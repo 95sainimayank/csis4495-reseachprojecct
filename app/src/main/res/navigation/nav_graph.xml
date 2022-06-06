@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/signupActivity">
+
+    <activity
+        android:id="@+id/signupActivity"
+        android:name="com.example.mixbox.SignupActivity"
+        android:label="activity_signup"
+        tools:layout="@layout/activity_signup" />
+    <fragment
+        android:id="@+id/songListToHome"
+        android:name="com.example.mixbox.fragments.SongListFragment"
+        android:label="fragment_song_list"
+        tools:layout="@layout/fragment_song_list" >
+        <action
+            android:id="@+id/action_songListFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.mixbox.fragments.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/homeToSongList"
+            app:destination="@id/songListToHome" />
+    </fragment>
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.example.mixbox.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main" />
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.example.mixbox.LoginActivity"
+        android:label="activity_login"
+        tools:layout="@layout/activity_login" />
+</navigation>
