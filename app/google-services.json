@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "111353528536",
+    "firebase_url": "https://project-b5992-default-rtdb.firebaseio.com",
+    "project_id": "project-b5992",
+    "storage_bucket": "project-b5992.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111353528536:android:06bb8005c39de6e9e057ad",
+        "android_client_info": {
+          "package_name": "com.example.mixbox"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111353528536-v2ecto72pggnpotamu6seg6dvuaj6vsf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPVDAplhonW_WXoBtThagz-mvUuzG9tGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111353528536-v2ecto72pggnpotamu6seg6dvuaj6vsf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
