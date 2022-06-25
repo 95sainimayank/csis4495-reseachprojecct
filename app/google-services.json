@@ -1,10 +1,40 @@
 {
   "project_info": {
     "project_number": "1056638654762",
+    "firebase_url": "https://research-project-4495-default-rtdb.firebaseio.com",
     "project_id": "research-project-4495",
     "storage_bucket": "research-project-4495.appspot.com"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056638654762:android:3ec28fd409444a8ed52653",
+        "android_client_info": {
+          "package_name": "com.example.fileopenproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056638654762-qegb3cf117802602aklloorf5h1htpfd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd2R1lcgJz0QBkBJfEXYT833X96crCW90"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1056638654762-qegb3cf117802602aklloorf5h1htpfd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:1056638654762:android:d6366966dd36efa3d52653",
