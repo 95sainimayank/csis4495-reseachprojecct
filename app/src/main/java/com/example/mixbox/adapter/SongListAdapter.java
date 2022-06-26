@@ -42,16 +42,19 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongVi
       SongListModel songItem = songList.get(position);
       holder.artistName.setText(songItem.getArtistName());
       holder.songTitle.setText(songItem.getSong().getSongName());
+      holder.playCount.setText(Integer.toString(songItem.getSong().getTimesPlayed()));
    }
 
    public class SongViewHolder extends RecyclerView.ViewHolder {
       TextView songTitle;
       TextView artistName;
+      TextView playCount;
 
       public SongViewHolder(@NonNull View itemView) {
          super(itemView);
          songTitle = itemView.findViewById(R.id.songTitle);
          artistName = itemView.findViewById(R.id.artistName);
+         playCount = itemView.findViewById(R.id.playCount1);
       }
 
    }
