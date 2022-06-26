@@ -7,9 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.mixbox.R;
 import com.example.mixbox.adapter.SongListAdapter;
 import com.example.mixbox.databinding.FragmentSongListBinding;
 import com.example.mixbox.model.Song;
@@ -22,7 +24,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class SongListFragment extends Fragment {
    FragmentSongListBinding binding;
@@ -50,6 +51,15 @@ public class SongListFragment extends Fragment {
       binding.songlistRecyclerView.setAdapter(songListAdapter);
 
       String type = getArguments().get("type").toString();
+
+
+      binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View view) {
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
+         }
+      });
+
 
       switch (type) {
          case "rock":
@@ -83,9 +93,9 @@ public class SongListFragment extends Fragment {
 
                                     recyclerViewModelObject.
                                       setSong(new Song(eachSong.get("songName").toString(),
-                                         Integer.parseInt(eachSong.get("timesPlayed").toString()),
-                                         LocalDateTime.parse(eachSong.get("dateTime").toString()),
-                                         null));
+                                        Integer.parseInt(eachSong.get("timesPlayed").toString()),
+                                        LocalDateTime.parse(eachSong.get("dateTime").toString()),
+                                        null));
 
                                     Log.e("---", recyclerViewModelObject.getSong().getSongName());
 
@@ -223,8 +233,17 @@ public class SongListFragment extends Fragment {
       return binding.getRoot();
    }
 
-
-   public void showSongsBasedOnType() {
-
+   @Override
+   public void onResume() {
+      super.onResume();
+      ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
    }
+
+   @Override
+   public void onStop() {
+      super.onStop();
+      ((AppCompatActivity) getActivity()).getSupportActionBar().show();
+   }
+
+
 }

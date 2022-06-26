@@ -1,8 +1,5 @@
 package com.example.mixbox;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +9,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.mixbox.model.AllUserData;
 import com.example.mixbox.model.Playlist;
 import com.example.mixbox.model.Song;
@@ -20,15 +20,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
@@ -64,17 +60,27 @@ public class LoginActivity extends AppCompatActivity {
             String email = emailEditText.getText().toString().trim();
             String pwd = pwdEditText.getText().toString().trim();
 
-            auth.signInWithEmailAndPassword(email, pwd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-               @Override
-               public void onComplete(@NonNull Task<AuthResult> task) {
-                  if(task.isSuccessful()){
-                     Toast.makeText(LoginActivity.this, "Login Successful !!", Toast.LENGTH_SHORT).show();
+            if (!isValidEmail(email)) {
+               Toast.makeText(LoginActivity.this, "Please enter a valid email!", Toast.LENGTH_SHORT).show();
+            } else if (pwd.length() < 8) {
+               Toast.makeText(LoginActivity.this, "Password should atleast be 8 characters!", Toast.LENGTH_SHORT).show();
+            } else {
+               auth.signInWithEmailAndPassword(email, pwd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                  @Override
+                  public void onComplete(@NonNull Task<AuthResult> task) {
+                     if (task.isSuccessful()) {
+                        Toast.makeText(LoginActivity.this, "Login Successful !!", Toast.LENGTH_SHORT).show();
 
-                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                     startActivity(intent);
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                     } else {
+                        Toast.makeText(LoginActivity.this, "Login failed! Please check your internet connection or your credentials.", Toast.LENGTH_SHORT).show();
+                     }
                   }
-               }
-            });
+               });
+            }
+
+
          }
       });
 
@@ -87,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
    }
 
 
-   public void addUserFunction(){
+   public void addUserFunction() {
       FirebaseDatabase db = FirebaseDatabase.getInstance();
       DatabaseReference reference = db.getReference();
 
@@ -150,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
 //         }
 //      });
 
-//      db.getReference().child("userCount").setValue(3).addOnCompleteListener(new OnCompleteListener<Void>() {
+   //      db.getReference().child("userCount").setValue(3).addOnCompleteListener(new OnCompleteListener<Void>() {
 //         @Override
 //         public void onComplete(@NonNull Task<Void> task) {
 //            if(task.isSuccessful()){
@@ -162,8 +168,18 @@ public class LoginActivity extends AppCompatActivity {
 //         }
 //      });
    //}
+   public boolean isValidEmail(String email) {
+      String expression = "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+        + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+        + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+        + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
 
-   public void addmoredata(){
+      return email.matches(expression) && email.length() > 0;
+   }
+
+   public void addmoredata() {
       FirebaseDatabase db = FirebaseDatabase.getInstance();
 
       List<String> s = new ArrayList<>();
@@ -204,10 +220,9 @@ public class LoginActivity extends AppCompatActivity {
       db.getReference().child("allUsers").push().setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
          @Override
          public void onComplete(@NonNull Task<Void> task) {
-            if(task.isSuccessful()){
+            if (task.isSuccessful()) {
                Log.e("---", "succedd");
-            }
-            else{
+            } else {
                Log.e("---", "failure");
             }
          }
