@@ -32,7 +32,7 @@ public class SongListFragment extends Fragment {
    FragmentSongListBinding binding;
    FirebaseDatabase db;
    ArrayList<SongListModel> allSongListItems;
-   SongListAdapter songListAdapter;
+   RecyclerSongListAdapter songListAdapter;
 
    public SongListFragment() {
    }
@@ -54,7 +54,7 @@ public class SongListFragment extends Fragment {
 
 
       //SongListAdapter songListAdapter = new SongListAdapter(getActivity(), allSongListItems);
-      RecyclerSongListAdapter songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems);
+      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems);
 
       //songListAdapter = new SongListAdapter(getActivity(), allSongListItems);
 

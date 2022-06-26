@@ -42,6 +42,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
         SongListModel songItem = songList.get(position);
         holder.artistName.setText(songItem.getArtistName());
         holder.songTitle.setText(songItem.getSong().getSongName());
+        holder.playCount.setText(Integer.toString(songItem.getSong().getTimesPlayed()));
 
         //classwork 12
         holder.menuOptions.setOnClickListener(new View.OnClickListener() {
@@ -83,7 +84,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView songTitle;
         TextView artistName;
-
+        TextView playCount;
         TextView menuOptions;
 
         public ViewHolder(@NonNull View itemView) {
@@ -91,6 +92,8 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
             songTitle = itemView.findViewById(R.id.music_title);
             artistName = itemView.findViewById(R.id.music_artist);
             menuOptions =itemView.findViewById(R.id.menu_options);
+            playCount = itemView.findViewById(R.id.play_count);
+
         }
 
     }
