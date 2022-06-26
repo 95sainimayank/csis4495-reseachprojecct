@@ -55,11 +55,11 @@
 
         <TextView
             android:id="@+id/menu_options"
-            android:layout_width="wrap_content"
+            android:layout_width="20dp"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:paddingLeft="4dp"
+            android:paddingLeft="6dp"
             android:text="&#8942;"
             android:textAppearance="?android:textAppearanceLarge"
             android:textSize="27sp"
