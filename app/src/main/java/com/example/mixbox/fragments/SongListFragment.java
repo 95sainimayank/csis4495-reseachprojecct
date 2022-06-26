@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.mixbox.R;
+import com.example.mixbox.adapter.RecyclerSongListAdapter;
 import com.example.mixbox.adapter.SongListAdapter;
 import com.example.mixbox.databinding.FragmentSongListBinding;
 import com.example.mixbox.model.Song;
@@ -47,7 +48,8 @@ public class SongListFragment extends Fragment {
 
       ArrayList<SongListModel> allSongListItems = new ArrayList<>();
 
-      SongListAdapter songListAdapter = new SongListAdapter(getActivity(), allSongListItems);
+      //SongListAdapter songListAdapter = new SongListAdapter(getActivity(), allSongListItems);
+      RecyclerSongListAdapter songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems);
       binding.songlistRecyclerView.setAdapter(songListAdapter);
 
       String type = getArguments().get("type").toString();
