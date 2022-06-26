@@ -54,7 +54,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.SongVi
          super(itemView);
          songTitle = itemView.findViewById(R.id.songTitle);
          artistName = itemView.findViewById(R.id.artistName);
-         playCount = itemView.findViewById(R.id.playCount);
+         playCount = itemView.findViewById(R.id.playCount1);
       }
 
    }
