@@ -2,6 +2,7 @@ package com.example.mixbox.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
@@ -48,20 +49,27 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
             public void onClick(View view) {
 
                 PopupMenu popup = new PopupMenu(context, holder.menuOptions);
+                popup.inflate(R.menu.options_menu);
 
-                //popup.inflate(R.menu.options_menu)
-                /*
-                Intent intent = new Intent(context, DetailActivity.class);
-
-                Bundle bundle = new Bundle();
-                bundle.putString("title", movie.getTitle());
-                bundle.putString("overview", movie.getOverview());
-                bundle.putString("poster", movie.getPoster());
-                bundle.putDouble("rating", movie.getRating());
-
-                intent.putExtras(bundle);
-                context.startActivity(intent);
-                */
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.play:
+                                //handle menu1 click
+                                break;
+                            case R.id.addFav:
+                                //handle menu2 click
+                                break;
+                            case R.id.removeFav:
+                                //handle menu3 click
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                //displaying the popup
+                popup.show();
 
             }
         });
