@@ -11,9 +11,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#4CAF50"
+        android:background="@color/purple_500"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator">
@@ -21,11 +20,11 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginStart="40dp"
             android:gravity="center_vertical"
             android:text="Songs List"
-            android:textSize="20sp"
-            android:layout_marginStart="100dp"
-            tools:layout_editor_absoluteX="72dp" />
+            android:textColor="@color/white"
+            android:textSize="20sp" />
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView

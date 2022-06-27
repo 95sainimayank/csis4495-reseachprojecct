@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.mixbox.R;
 import com.example.mixbox.adapter.RecyclerSongListAdapter;
-import com.example.mixbox.adapter.SongListAdapter;
 import com.example.mixbox.databinding.FragmentSongListBinding;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
@@ -190,14 +189,16 @@ public class SongListFragment extends Fragment {
                             LocalDateTime.parse(eachSong.get("dateTime").toString()),
                             null));
 
-                        Log.e("---", recyclerViewModelObject.getSong().getSongName());
-
-
                         allSongListItems.add(recyclerViewModelObject);
 
                      }
                   }
                }
+
+               for(SongListModel m : allSongListItems){
+                  Log.e("ppp", m.getSong().getSongName() + " " + m.getSong().getTimesPlayed());
+               }
+
                if(cardType.equals("latest")){
                   allSongListItems.sort(new SortSongByLatest());
                }
