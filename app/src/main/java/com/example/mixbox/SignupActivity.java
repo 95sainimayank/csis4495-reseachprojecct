@@ -97,6 +97,7 @@ public class SignupActivity extends AppCompatActivity {
 
                      } else {
                         Log.e("TAG", "Is Old User!");
+                        Toast.makeText(SignupActivity.this, "Email already registered! Please use another email!", Toast.LENGTH_SHORT).show();
                      }
                   }
                });
@@ -132,39 +133,3 @@ public class SignupActivity extends AppCompatActivity {
       });
    }
 }
-
-
-//
-//            else if(!emailExists(email)){ //create user in auth
-//
-//
-//               //adding user to realtime db
-//
-//
-//            }
-
-
-//db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-//@Override
-//public void onComplete(@NonNull Task<DataSnapshot> task) {
-//  if(task.isSuccessful()) {
-//  DataSnapshot snapshot = task.getResult();
-//  HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
-//  HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
-//
-//  for (Object value : allUsers.values()) {
-//  HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
-//
-//  if(eachUser.get("email").equals(email)){
-//  exists[0] = true;
-//  }
-//  }
-//  }
-//  else{
-//  Log.e("---", task.getException().toString());
-//  }
-//  }
-//  });
-
-
-

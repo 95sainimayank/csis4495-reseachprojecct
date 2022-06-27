@@ -1,6 +1,7 @@
 package com.example.mixbox.adapter;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,9 +12,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.example.mixbox.R;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.example.mixbox.fragments.HomeFragment;
+import com.example.mixbox.fragments.SongPlayFragment;
 import com.example.mixbox.model.SongListModel;
 
 import java.util.ArrayList;
@@ -58,6 +62,13 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         switch (item.getItemId()) {
                             case R.id.play:
                                 //handle menu1 click
+                                Bundle bundle = new Bundle();
+                                bundle.putString("title", songItem.getSong().getSongName());
+                                bundle.putString("artist", songItem.getArtistName());
+                                SongPlayFragment fragment = new SongPlayFragment();
+                                fragment.setArguments(bundle);
+                                ((FragmentActivity)context).getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+
                                 break;
                             case R.id.addFav:
                                 //handle menu2 click
