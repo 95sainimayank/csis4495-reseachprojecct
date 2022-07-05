@@ -51,11 +51,7 @@ public class SongListFragment extends Fragment {
 
       allSongListItems = new ArrayList<>();
 
-
-      //SongListAdapter songListAdapter = new SongListAdapter(getActivity(), allSongListItems);
       songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems);
-
-      //songListAdapter = new SongListAdapter(getActivity(), allSongListItems);
 
       binding.songlistRecyclerView.setAdapter(songListAdapter);
 
@@ -67,7 +63,6 @@ public class SongListFragment extends Fragment {
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
          }
       });
-
 
       switch (type) {
          case "rock":
