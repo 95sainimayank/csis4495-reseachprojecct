@@ -50,7 +50,7 @@ public class SearchSongFragment extends Fragment {
 
       binding.searchedSongRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
       allSongListItems = new ArrayList<>();
-      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems);
+      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems,null);
       binding.searchedSongRecyclerView.setAdapter(songListAdapter);
 
       binding.btnSearchSong.setOnClickListener(new View.OnClickListener() {

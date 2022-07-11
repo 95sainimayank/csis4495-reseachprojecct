@@ -12,11 +12,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.example.mixbox.R;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.example.mixbox.fragments.HomeFragment;
+import com.example.mixbox.fragments.OnSongClickListener;
 import com.example.mixbox.fragments.SongPlayFragment;
 import com.example.mixbox.model.SongListModel;
 
@@ -27,10 +28,12 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
 
     ArrayList<SongListModel> songList;
     private Context context;
+    OnSongClickListener listener;
 
-    public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList){
+    public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, OnSongClickListener listener){
         this.context = context;
         this.songList = songList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -48,7 +51,16 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
         holder.songTitle.setText(songItem.getSong().getSongName());
         holder.playCount.setText(Integer.toString(songItem.getSong().getTimesPlayed()));
 
-        //classwork 12
+
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(listener != null){
+                    listener.onSongClick(songItem);
+                }
+            }
+        });
+
         holder.menuOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,6 +109,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
         TextView artistName;
         TextView playCount;
         TextView menuOptions;
+        CardView cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -104,7 +117,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
             artistName = itemView.findViewById(R.id.music_artist);
             menuOptions =itemView.findViewById(R.id.menu_options);
             playCount = itemView.findViewById(R.id.play_count);
-
+            cardView = itemView.findViewById(R.id.card_view);
         }
 
     }

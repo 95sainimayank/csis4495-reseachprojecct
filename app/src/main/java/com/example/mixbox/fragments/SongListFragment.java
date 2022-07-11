@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SongListFragment extends Fragment {
+public class SongListFragment extends Fragment implements OnSongClickListener{
    FragmentSongListBinding binding;
    FirebaseDatabase db;
    ArrayList<SongListModel> allSongListItems;
@@ -51,9 +52,12 @@ public class SongListFragment extends Fragment {
 
       allSongListItems = new ArrayList<>();
 
-      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems);
+      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, this);
 
       binding.songlistRecyclerView.setAdapter(songListAdapter);
+
+      binding.sTitle.setText("Not selected");
+      binding.sArtist.setText("Not selected");
 
       String type = getArguments().get("type").toString();
 
@@ -209,4 +213,9 @@ public class SongListFragment extends Fragment {
       });
    }
 
+   @Override
+   public void onSongClick(SongListModel songListModel) {
+      binding.sTitle.setText(songListModel.getSong().getSongName());
+      binding.sArtist.setText(songListModel.getArtistName());
+   }
 }
