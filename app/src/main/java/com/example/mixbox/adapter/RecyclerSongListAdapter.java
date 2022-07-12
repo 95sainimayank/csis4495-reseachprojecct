@@ -12,10 +12,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mixbox.R;
+
+import androidx.cardview.widget.CardView;
+
+import com.example.mixbox.fragments.OnSongClickListener;
+
 import com.example.mixbox.fragments.SongPlayFragment;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
@@ -32,15 +38,18 @@ import java.util.UUID;
 
 public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongListAdapter.ViewHolder> {
 
-   private final Context context;
+
+   private Context context;
    ArrayList<SongListModel> songList;
    FirebaseDatabase db;
    String currentUserEmail;
+   OnSongClickListener listener;
 
-   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList) {
-      this.context = context;
-      this.songList = songList;
-   }
+    public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, OnSongClickListener listener){
+        this.context = context;
+        this.songList = songList;
+        this.listener = listener;
+    }
 
    @NonNull
    @Override
@@ -52,8 +61,10 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       FirebaseAuth auth = FirebaseAuth.getInstance();
       currentUserEmail = auth.getCurrentUser().getEmail().toString();
 
+
       return viewHolder;
    }
+
 
    @Override
    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
@@ -66,6 +77,10 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       holder.menuOptions.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
+
+            if(listener != null){
+               listener.onSongClick(songItem);
+            }
 
             PopupMenu popup = new PopupMenu(context, holder.menuOptions);
             popup.inflate(R.menu.options_menu);
@@ -227,24 +242,26 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
 
    }
 
-   public class ViewHolder extends RecyclerView.ViewHolder {
-      TextView songTitle;
-      TextView artistName;
-      TextView playCount;
-      TextView menuOptions;
-
-      public ViewHolder(@NonNull View itemView) {
-         super(itemView);
-         songTitle = itemView.findViewById(R.id.music_title);
-         artistName = itemView.findViewById(R.id.music_artist);
-         menuOptions = itemView.findViewById(R.id.menu_options);
-         playCount = itemView.findViewById(R.id.play_count);
-
-      }
-
-   }
 
 
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+       TextView songTitle;
+       TextView artistName;
+       TextView playCount;
+       TextView menuOptions;
+       CardView cardView;
+
+       public ViewHolder(@NonNull View itemView) {
+          super(itemView);
+          songTitle = itemView.findViewById(R.id.music_title);
+          artistName = itemView.findViewById(R.id.music_artist);
+          menuOptions = itemView.findViewById(R.id.menu_options);
+          playCount = itemView.findViewById(R.id.play_count);
+          cardView = itemView.findViewById(R.id.card_view);
+       }
+
+    }
 }
 
 
