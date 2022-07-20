@@ -25,6 +25,7 @@ import com.example.mixbox.fragments.OnSongClickListener;
 import com.example.mixbox.fragments.SongPlayFragment;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
+import com.example.mixbox.utilities.PlaylistDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,15 +38,13 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongListAdapter.ViewHolder> {
-
-
    private Context context;
    ArrayList<SongListModel> songList;
    FirebaseDatabase db;
    String currentUserEmail;
    OnSongClickListener listener;
 
-    public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, OnSongClickListener listener){
+   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, OnSongClickListener listener){
         this.context = context;
         this.songList = songList;
         this.listener = listener;
@@ -64,7 +63,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
 
       return viewHolder;
    }
-
 
    @Override
    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
@@ -97,7 +95,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         SongPlayFragment fragment = new SongPlayFragment();
                         fragment.setArguments(bundle);
                         ((FragmentActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
-
                         break;
                      case R.id.addFav:
                         addToFavorite(songItem.getSong().getSongName());
@@ -105,15 +102,22 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                      case R.id.removeFav:
                         removeFromFavorite(songItem.getSong().getSongName());
                         break;
+                     case R.id.addToPlaylist:
+                        addToPlaylist(songItem.getSong().getSongName());
                   }
                   return false;
                }
             });
-            //displaying the popup
             popup.show();
 
          }
       });
+   }
+
+   private void addToPlaylist(String songName) {
+      PlaylistDialog dialog = new PlaylistDialog(context, songName);
+      FragmentActivity f = (FragmentActivity)context;
+      dialog.show(f.getSupportFragmentManager(), "Hello");
    }
 
    private void removeFromFavorite(String songName) {
@@ -178,7 +182,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       });
    }
 
-
    @Override
    public int getItemCount() {
       return songList.size();
@@ -241,9 +244,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       });
 
    }
-
-
-
 
     public class ViewHolder extends RecyclerView.ViewHolder {
        TextView songTitle;

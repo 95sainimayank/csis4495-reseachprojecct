@@ -12,7 +12,9 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.mixbox.fragments.EventFragment;
+import com.example.mixbox.fragments.PlaylistFragment;
 import com.example.mixbox.fragments.SearchSongFragment;
+import com.example.mixbox.fragments.SongListFragment;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
          public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             int id = item.getItemId();
 
-            switch(id){
+            switch (id) {
                case R.id.nav_search:
                   getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new SearchSongFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
@@ -48,7 +50,18 @@ public class MainActivity extends AppCompatActivity {
                   getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new EventFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
-               default :
+               case R.id.nav_favorite:
+                  Bundle bundle = new Bundle();
+                  bundle.putString("type", "favorite");
+                  SongListFragment fragment = new SongListFragment();
+                  fragment.setArguments(bundle);
+                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+                  drawer.closeDrawer(Gravity.LEFT);
+                  return true;
+               case R.id.nav_playlist:
+                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new PlaylistFragment()).commit();
+                  drawer.closeDrawer(Gravity.LEFT);
+               default:
                   return false;
             }
 
@@ -63,8 +76,7 @@ public class MainActivity extends AppCompatActivity {
    public void onBackPressed() {
       if (drawer.isDrawerOpen(GravityCompat.START)) {
          drawer.closeDrawer(GravityCompat.START);
-      }
-      else {
+      } else {
          super.onBackPressed();
 
       }

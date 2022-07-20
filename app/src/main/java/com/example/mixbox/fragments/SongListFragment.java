@@ -5,7 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +21,7 @@ import com.example.mixbox.utilities.SortSongByLatest;
 import com.example.mixbox.utilities.SortSongByPlayCount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -28,11 +29,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SongListFragment extends Fragment implements OnSongClickListener{
+public class SongListFragment extends Fragment implements OnSongClickListener {
    FragmentSongListBinding binding;
    FirebaseDatabase db;
    ArrayList<SongListModel> allSongListItems;
    RecyclerSongListAdapter songListAdapter;
+   FirebaseAuth auth;
+   ArrayList<SongListModel> allSongs;
 
    public SongListFragment() {
    }
@@ -47,10 +50,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener{
       binding = FragmentSongListBinding.inflate(inflater, container, false);
 
       db = FirebaseDatabase.getInstance();
-
+      auth = FirebaseAuth.getInstance();
       binding.songlistRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
       allSongListItems = new ArrayList<>();
+      allSongs = new ArrayList<>();
 
       songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, this);
 
@@ -84,6 +88,8 @@ public class SongListFragment extends Fragment implements OnSongClickListener{
          case "mostPlayed":
             showSongBasedOnMainCards("mostPlayed");
             break;
+         case "favorite":
+            getAllSongs();
          default:
             break;
       }
@@ -100,6 +106,54 @@ public class SongListFragment extends Fragment implements OnSongClickListener{
    public void onStop() {
       super.onStop();
       ((AppCompatActivity) getActivity()).getSupportActionBar().show();
+   }
+
+   public void getAllSongs() {
+      db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+         @Override
+         public void onComplete(@NonNull Task<DataSnapshot> task) {
+            if (task.isSuccessful()) {
+               DataSnapshot snapshot = task.getResult();
+               HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
+               HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
+
+               for (Object value : allUsers.values()) {
+                  HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
+
+                  HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("songs");
+
+                  if (eachUserSongs != null) {
+                     for (Object song : eachUserSongs.values()) {
+                        HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
+
+                        Log.e("---", eachSong.get("songName").toString());
+
+                        SongListModel recyclerViewModelObject = new SongListModel();
+
+                        String name = eachUser.get("fullName").toString();
+                        recyclerViewModelObject.setArtistName(name);
+
+                        recyclerViewModelObject.
+                          setSong(new Song(eachSong.get("songName").toString(),
+                            Integer.parseInt(eachSong.get("timesPlayed").toString()),
+                            LocalDateTime.parse(eachSong.get("dateTime").toString()),
+                            null));
+
+                        allSongs.add(recyclerViewModelObject);
+
+                     }
+                  }
+               }
+
+            } else {
+               Log.e("---", task.getException().toString());
+            }
+         }
+      });
+
+      Log.e("getsongs", allSongs.size() + "");
+      showFavoriteList();
+
    }
 
    public void showSongBasedOnCategory(String category) {
@@ -137,8 +191,6 @@ public class SongListFragment extends Fragment implements OnSongClickListener{
                                   LocalDateTime.parse(eachSong.get("dateTime").toString()),
                                   null));
 
-                              Log.e("---", recyclerViewModelObject.getSong().getSongName());
-
                               allSongListItems.add(recyclerViewModelObject);
                            }
                         }
@@ -152,9 +204,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener{
             }
          }
       });
+
+
    }
 
-   public void showSongBasedOnMainCards(String cardType){
+   public void showSongBasedOnMainCards(String cardType) {
       db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
          @Override
          public void onComplete(@NonNull Task<DataSnapshot> task) {
@@ -194,14 +248,9 @@ public class SongListFragment extends Fragment implements OnSongClickListener{
                   }
                }
 
-               for(SongListModel m : allSongListItems){
-                  Log.e("ppp", m.getSong().getSongName() + " " + m.getSong().getTimesPlayed());
-               }
-
-               if(cardType.equals("latest")){
+               if (cardType.equals("latest")) {
                   allSongListItems.sort(new SortSongByLatest());
-               }
-               else {
+               } else {
                   allSongListItems.sort(new SortSongByPlayCount());
                }
 
@@ -213,9 +262,106 @@ public class SongListFragment extends Fragment implements OnSongClickListener{
       });
    }
 
+   private void showFavoriteList() {
+      String email = auth.getCurrentUser().getEmail();
+
+      db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+         @Override
+         public void onComplete(@NonNull Task<DataSnapshot> task) {
+            if (task.isSuccessful()) {
+               DataSnapshot snapshot = task.getResult();
+               HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
+               HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
+
+               for (Object value : allUsers.values()) {
+                  HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
+
+                  if (eachUser.get("email").equals(email)) {
+                     HashMap<String, Object> favoriteSongsFromDb = (HashMap<String, Object>) eachUser.get("favoriteSongs");
+
+                     if (favoriteSongsFromDb != null) {
+                        for (Object song : favoriteSongsFromDb.values()) {
+                          String songName = song.toString();
+
+                          for(SongListModel s : allSongs){
+                             if(s.getSong().getSongName().equals(songName)){
+                                SongListModel recyclerViewModelObject = new SongListModel();
+
+                                String name = eachUser.get("fullName").toString();
+                                recyclerViewModelObject.setArtistName(name);
+
+                                recyclerViewModelObject.
+                                  setSong(new Song(s.getSong().getSongName().toString(),
+                                    s.getSong().getTimesPlayed(),
+                                    LocalDateTime.parse(s.getSong().getDateTime().toString()),
+                                    null));
+
+                                allSongListItems.add(recyclerViewModelObject);
+                                return;
+                             }
+                          }
+                        }
+                     } else {
+                        Toast.makeText(getActivity(), "No Favorite song present !!", Toast.LENGTH_SHORT).show();
+                     }
+                  }
+               }
+
+               songListAdapter.notifyDataSetChanged();
+            } else {
+               Log.e("---", task.getException().toString());
+            }
+         }
+      });
+
+   }
+
    @Override
    public void onSongClick(SongListModel songListModel) {
       binding.sTitle.setText(songListModel.getSong().getSongName());
       binding.sArtist.setText(songListModel.getArtistName());
    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
