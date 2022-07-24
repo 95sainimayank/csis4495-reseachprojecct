@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +36,11 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.UUID;
 
@@ -41,16 +48,19 @@ import java.util.UUID;
 public class SongPlayFragment extends Fragment {
     FragmentSongPlayBinding binding;
 
-    private static final String DEFAULT_MEDIA_URI =
-            //"https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv";
-            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3";
-    //https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3
+    FirebaseDatabase db;
+    FirebaseStorage storage;
 
     private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
     private static final String EXTENSION_EXTRA = "extension";
     private static final String DRM_SCHEME_EXTRA = "drm_scheme";
     private static final String DRM_LICENSE_URL_EXTRA = "drm_license_url";
     private static final String OWNER_EXTRA = "owner";
+
+    private static String DEFAULT_MEDIA_URI =
+            //"https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv";
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3";
+    //https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3
 
     private boolean isOwner;
     @Nullable
@@ -95,6 +105,11 @@ public class SongPlayFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = FragmentSongPlayBinding.inflate(inflater, container, false);
 
+        db = FirebaseDatabase.getInstance();
+        storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+
         TextView songTitle = binding.sTitle;
         TextView artistName = binding.sArtist;
         playerControlView = binding.playerControlView;
@@ -107,6 +122,30 @@ public class SongPlayFragment extends Fragment {
         songTitle.setText(title);
         artistName.setText(artist);
 
+
+        //[download_via_url]
+        String fileName = "hopeful-piano-112621.mp3";
+        storageRef.child(fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+            @Override
+            public void onSuccess(Uri uri) {
+                DEFAULT_MEDIA_URI = uri.toString();
+               if (isOwner && player == null) {
+                   startPlayer();
+                   Log.d("---", "SongPlayFragment-player :  " + player);
+                   playerControlView.setPlayer(player);
+                   playerControlView.show();
+               }
+
+                Log.d("---", "URI : " + DEFAULT_MEDIA_URI);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("---", "Error: " + e);
+            }
+        });
+
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_song_play, container, false);
         return binding.getRoot();
@@ -116,13 +155,13 @@ public class SongPlayFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if (isOwner && player == null) {
-           initializePlayer();
-        }
-
-        PlayerControlView playerControlView = Assertions.checkNotNull(this.playerControlView);
-        playerControlView.setPlayer(player);
-        playerControlView.show();
+//        if (isOwner && player == null) {
+//           initializePlayer();
+//        }
+//
+//        PlayerControlView playerControlView = Assertions.checkNotNull(this.playerControlView);
+//        playerControlView.setPlayer(player);
+//        playerControlView.show();
     }
 
     @Override
@@ -146,11 +185,15 @@ public class SongPlayFragment extends Fragment {
     }
 
 
-    private void initializePlayer() {
+    private void startPlayer() {
         //Bundle bundle = getArguments();
         Intent intent = null;
         Uri data = null;
         //String action = intent.getAction();
+
+        Log.d("---", "initializePalyer play: uri - " + DEFAULT_MEDIA_URI);
+        //DEFAULT_MEDIA_URI = "https://firebasestorage.googleapis.com/v0/b/hkkofirstproject.appspot.com/o/hopeful-piano-112621.mp3?alt=media&token=00a85881-aaf7-4063-be78-db9b16dfc8e7";
+
         String action = "";
         Uri uri =
                 ACTION_VIEW.equals(action)

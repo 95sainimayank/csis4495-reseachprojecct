@@ -18,7 +18,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="6dp"
     tools:context=".fragments.SongPlayFragment">
 
     <LinearLayout
@@ -32,6 +31,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             app:show_timeout="0" />
+
+        <ImageView
+            android:id="@+id/album_image"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/album"
+            tools:srcCompat="@drawable/album" />
 
         <TextView
             android:id="@+id/sTitle"
@@ -53,21 +63,10 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:text="@string/playSongArtist"
-            android:textColor="@color/teal_700"
             android:textSize="20sp"
+            android:textColor="@color/teal_700"
             app:layout_constraintStart_toStartOf="@+id/sTitle"
             app:layout_constraintTop_toBottomOf="@+id/sTitle" />
-
-        <ImageView
-            android:id="@+id/album_image"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/album"
-            tools:srcCompat="@drawable/album" />
 
     </LinearLayout>
 

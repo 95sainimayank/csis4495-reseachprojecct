@@ -1,5 +1,7 @@
 package com.example.mixbox.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,17 +21,42 @@ import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
 import com.example.mixbox.utilities.SortSongByLatest;
 import com.example.mixbox.utilities.SortSongByPlayCount;
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
+import com.google.android.exoplayer2.drm.DrmSessionManager;
+import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
+import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
+import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.util.Assertions;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import androidx.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
+
 
 public class SongListFragment extends Fragment implements OnSongClickListener {
    FragmentSongListBinding binding;
@@ -38,6 +65,23 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    RecyclerSongListAdapter songListAdapter;
    FirebaseAuth auth;
    ArrayList<SongListModel> allSongs;
+
+   //For Player -------------------------------------------------start
+   FirebaseStorage storage;
+   StorageReference storageRef;
+   @Nullable
+   private static ExoPlayer player;
+   private boolean isOwner;
+   @Nullable
+   private PlayerControlView playerControlView;
+
+   private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
+   private static final String EXTENSION_EXTRA = "extension";
+   private static final String DRM_SCHEME_EXTRA = "drm_scheme";
+   private static final String DRM_LICENSE_URL_EXTRA = "drm_license_url";
+   private static final String OWNER_EXTRA = "owner";
+   private static String DEFAULT_MEDIA_URI = "";
+   //For Player -------------------------------------------------end
 
    public SongListFragment() {
    }
@@ -62,8 +106,15 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
       binding.songlistRecyclerView.setAdapter(songListAdapter);
 
-      binding.sTitle.setText("Not selected");
-      binding.sArtist.setText("Not selected");
+
+      binding.sTitleScroll.setText("Not selected");
+      binding.sArtistScroll.setText("Not selected");
+
+      storage = FirebaseStorage.getInstance();
+      storageRef = storage.getReference();
+      isOwner = true;
+      playerControlView = binding.playerControlViewScroll;
+
       String type = "";
 
       if(getArguments().get("type") != null)
@@ -380,8 +431,98 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
    @Override
    public void onSongClick(SongListModel songListModel) {
-      binding.sTitle.setText(songListModel.getSong().getSongName());
-      binding.sArtist.setText(songListModel.getArtistName());
+      binding.sTitleScroll.setText(songListModel.getSong().getSongName());
+      binding.sArtistScroll.setText(songListModel.getArtistName());
+
+      String fileName = "hopeful-piano-112621.mp3";
+      storageRef.child(fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+         @Override
+         public void onSuccess(Uri uri) {
+            DEFAULT_MEDIA_URI = uri.toString();
+            if (isOwner && player == null) {
+               startPlayer();
+               Log.d("---", "RecyclerSongListAdapter-player :  " + player);
+               Log.d("---", "RecyclerSongListAdapter-playerControlView :  " + playerControlView);
+               playerControlView.setPlayer(player);
+               playerControlView.show();
+            }
+
+            Log.d("---", "URI : " + DEFAULT_MEDIA_URI);
+         }
+      }).addOnFailureListener(new OnFailureListener() {
+         @Override
+         public void onFailure(@NonNull Exception e) {
+            Log.e("---", "Error: " + e);
+         }
+      });
+   }
+
+   private void startPlayer() {
+      //Bundle bundle = getArguments();
+      Intent intent = null;
+      Uri data = null;
+      //String action = intent.getAction();
+
+      Log.d("---", "startPlayer play: uri - " + DEFAULT_MEDIA_URI);
+      //DEFAULT_MEDIA_URI = "https://firebasestorage.googleapis.com/v0/b/hkkofirstproject.appspot.com/o/hopeful-piano-112621.mp3?alt=media&token=00a85881-aaf7-4063-be78-db9b16dfc8e7";
+
+      String action = "";
+      Uri uri =
+              ACTION_VIEW.equals(action)
+                      //? Assertions.checkNotNull(intent.getData())
+                      ? Assertions.checkNotNull(data)
+                      : Uri.parse(DEFAULT_MEDIA_URI);
+
+      Log.d("---", "startPlayer play___#1____");
+      DrmSessionManager drmSessionManager;
+      if (intent != null && intent.hasExtra(DRM_SCHEME_EXTRA)) {
+         String drmScheme = Assertions.checkNotNull(intent.getStringExtra(DRM_SCHEME_EXTRA));
+         String drmLicenseUrl = Assertions.checkNotNull(intent.getStringExtra(DRM_LICENSE_URL_EXTRA));
+         UUID drmSchemeUuid = Assertions.checkNotNull(Util.getDrmUuid(drmScheme));
+         HttpDataSource.Factory licenseDataSourceFactory = new DefaultHttpDataSource.Factory();
+         HttpMediaDrmCallback drmCallback =
+                 new HttpMediaDrmCallback(drmLicenseUrl, licenseDataSourceFactory);
+         drmSessionManager =
+                 new DefaultDrmSessionManager.Builder()
+                         .setUuidAndExoMediaDrmProvider(drmSchemeUuid, FrameworkMediaDrm.DEFAULT_PROVIDER)
+                         .build(drmCallback);
+      } else {
+         drmSessionManager = DrmSessionManager.DRM_UNSUPPORTED;
+      }
+
+      Log.d("---", "startPlayer play___#2____");
+      //DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(getActivity());
+      DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(getActivity());
+
+      Log.d("---", "startPlayer play___#3____");
+      MediaSource mediaSource;
+      @C.ContentType int type = Util.inferContentType(uri, (intent == null ? null : intent.getStringExtra(EXTENSION_EXTRA)));
+
+      Log.d("---", "startPlayer play___#4 type:" + Integer.toString(type) + "---");
+      if (type == C.TYPE_DASH) {
+         mediaSource =
+                 new DashMediaSource.Factory(dataSourceFactory)
+                         .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
+                         .createMediaSource(MediaItem.fromUri(uri));
+      } else if (type == C.TYPE_OTHER) {
+         mediaSource =
+                 new ProgressiveMediaSource.Factory(dataSourceFactory)
+                         .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
+                         .createMediaSource(MediaItem.fromUri(uri));
+      } else {
+         throw new IllegalStateException();
+      }
+
+      Log.d("---", "startPlayer play___#5____");
+      //ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
+      ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
+      player.setMediaSource(mediaSource);
+      player.prepare();
+      player.play();
+      player.setRepeatMode(Player.REPEAT_MODE_ALL);
+
+      this.player = player;
    }
 }
 
