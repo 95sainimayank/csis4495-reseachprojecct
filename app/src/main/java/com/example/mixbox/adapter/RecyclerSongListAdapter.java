@@ -1,6 +1,8 @@
 package com.example.mixbox.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,11 +29,33 @@ import com.example.mixbox.fragments.SongPlayFragment;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
 import com.example.mixbox.utilities.PlaylistDialog;
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
+import com.google.android.exoplayer2.drm.DrmSessionManager;
+import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
+import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
+import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.util.Assertions;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +68,23 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
    FirebaseDatabase db;
    String currentUserEmail;
    OnSongClickListener listener;
+
+   /*
+   FirebaseStorage storage;
+   StorageReference storageRef;
+   @Nullable
+   private static ExoPlayer player;
+   private boolean isOwner;
+   @Nullable
+   private PlayerControlView playerControlView;
+
+   private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
+   private static final String EXTENSION_EXTRA = "extension";
+   private static final String DRM_SCHEME_EXTRA = "drm_scheme";
+   private static final String DRM_LICENSE_URL_EXTRA = "drm_license_url";
+   private static final String OWNER_EXTRA = "owner";
+   private static String DEFAULT_MEDIA_URI = "";
+   */
 
    public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, OnSongClickListener listener){
         this.context = context;
@@ -60,6 +102,13 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       FirebaseAuth auth = FirebaseAuth.getInstance();
       currentUserEmail = auth.getCurrentUser().getEmail().toString();
 
+      /*
+      storage = FirebaseStorage.getInstance();
+      storageRef = storage.getReference();
+      isOwner = true;
+      //playerControlView = binding.playerControlViewScroll;
+
+       */
 
       return viewHolder;
    }
@@ -71,14 +120,43 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       holder.songTitle.setText(songItem.getSong().getSongName());
       holder.playCount.setText(Integer.toString(songItem.getSong().getTimesPlayed()));
 
+      holder.cardView.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+            if(listener != null){
+               listener.onSongClick(songItem);
+               /*
+               String fileName = "hopeful-piano-112621.mp3";
+               storageRef.child(fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+                  @Override
+                  public void onSuccess(Uri uri) {
+                     DEFAULT_MEDIA_URI = uri.toString();
+                     if (isOwner && player == null) {
+                        startPlayer();
+                        Log.d("---", "RecyclerSongListAdapter-player :  " + player);
+                        Log.d("---", "RecyclerSongListAdapter-playerControlView :  " + holder.playerControlView);
+                        holder.playerControlView.setPlayer(player);
+                        holder.playerControlView.show();
+                     }
+
+                     Log.d("---", "URI : " + DEFAULT_MEDIA_URI);
+                  }
+               }).addOnFailureListener(new OnFailureListener() {
+                  @Override
+                  public void onFailure(@NonNull Exception e) {
+                     Log.e("---", "Error: " + e);
+                  }
+               });
+            */
+            }
+         }
+      });
+
       //classwork 12
       holder.menuOptions.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
-
-            if(listener != null){
-               listener.onSongClick(songItem);
-            }
 
             PopupMenu popup = new PopupMenu(context, holder.menuOptions);
             popup.inflate(R.menu.options_menu);
@@ -262,6 +340,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
        }
 
     }
+
 }
 
 
