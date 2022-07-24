@@ -52,9 +52,11 @@ import com.google.firebase.storage.StorageReference;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import androidx.annotation.Nullable;
+import java.util.Set;
 import java.util.UUID;
 
-import androidx.annotation.Nullable;
+
 
 public class SongListFragment extends Fragment implements OnSongClickListener {
    FragmentSongListBinding binding;
@@ -113,7 +115,10 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       playerControlView = binding.playerControlViewScroll;
 
 
-      String type = getArguments().get("type").toString();
+      String type = "";
+
+      if(getArguments().get("type") != null)
+         type = getArguments().get("type").toString();
 
       binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
          @Override
