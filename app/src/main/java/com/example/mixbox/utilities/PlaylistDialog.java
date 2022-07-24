@@ -11,9 +11,13 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mixbox.R;
+import com.example.mixbox.adapter.PlaylistAdapter;
+import com.example.mixbox.adapter.RecyclerSongListAdapter;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,18 +33,17 @@ import java.util.List;
 
 public class PlaylistDialog extends AppCompatDialogFragment {
    RecyclerView recyclerView;
-   Context context ;
-   String sName ;
+   Context context;
+   String sName;
    List<String> allPlaylists;
    FirebaseDatabase db;
    FirebaseAuth auth;
 
-   public PlaylistDialog(Context ctx, String songName){
+   public PlaylistDialog(Context ctx, String songName) {
       context = ctx;
       this.sName = songName;
       allPlaylists = new ArrayList<>();
    }
-
 
    @NonNull
    @Override
@@ -48,8 +51,6 @@ public class PlaylistDialog extends AppCompatDialogFragment {
       allPlaylists.clear();
       db = FirebaseDatabase.getInstance();
       auth = FirebaseAuth.getInstance();
-
-      getAllPlayLists();
 
       AlertDialog.Builder builder = new AlertDialog.Builder(context);
       LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -59,11 +60,12 @@ public class PlaylistDialog extends AppCompatDialogFragment {
 
       builder.setView(view).setTitle("Add to playlist");
 
+      getAllPlayLists();
       return builder.create();
    }
 
-   public void getAllPlayLists(){
-      String email = auth.getCurrentUser().getEmail();
+   public void getAllPlayLists() {
+      allPlaylists.clear();
 
       db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
          @Override
@@ -76,38 +78,31 @@ public class PlaylistDialog extends AppCompatDialogFragment {
                for (Object value : allUsers.values()) {
                   HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
 
-                  HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("playlists");
+                  if (eachUser.get("email").equals(auth.getCurrentUser().getEmail())) {
+                     HashMap<String, Object> playlists = (HashMap<String, Object>) eachUser.get("playlists");
 
-                  if (eachUserSongs != null) {
-                     for (Object song : eachUserSongs.values()) {
-                        HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
+                     if (playlists != null) {
+                        for (Object eachPlaylist : playlists.values()) {
+                           HashMap<String, Object> playlist = (HashMap<String, Object>) eachPlaylist;
 
-                        Log.e("---", eachSong.get("songName").toString());
-
-                        SongListModel recyclerViewModelObject = new SongListModel();
-
-                        String name = eachUser.get("fullName").toString();
-                        recyclerViewModelObject.setArtistName(name);
-
-                        recyclerViewModelObject.
-                          setSong(new Song(eachSong.get("songName").toString(),
-                            Integer.parseInt(eachSong.get("timesPlayed").toString()),
-                            LocalDateTime.parse(eachSong.get("dateTime").toString()),
-                            null));
-
-                       // allSongs.add(recyclerViewModelObject);
-
+                           String playlistName = playlist.get("name").toString();
+                           allPlaylists.add(playlistName);
+                        }
                      }
+
+                     recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                     PlaylistAdapter adapter = new PlaylistAdapter(allPlaylists, sName, getActivity(), "dialog");
+                     recyclerView.setAdapter(adapter);
+
+                     break;
                   }
                }
-
             } else {
                Log.e("---", task.getException().toString());
             }
          }
       });
-
-
    }
 }
 
