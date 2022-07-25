@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.bumptech.glide.Glide;
 import com.example.mixbox.R;
 import com.example.mixbox.adapter.RecyclerSongListAdapter;
 import com.example.mixbox.databinding.FragmentSongListBinding;
@@ -95,6 +96,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       binding = FragmentSongListBinding.inflate(inflater, container, false);
 
+      Log.d("---", "onCreateView in SongListFragment.");
       db = FirebaseDatabase.getInstance();
       auth = FirebaseAuth.getInstance();
       binding.songlistRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -102,13 +104,10 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       allSongListItems = new ArrayList<>();
       allSongs = new ArrayList<>();
 
-      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, this);
-
-      binding.songlistRecyclerView.setAdapter(songListAdapter);
-
-
-      binding.sTitleScroll.setText("Not selected");
-      binding.sArtistScroll.setText("Not selected");
+      binding.sTitleScroll.setText("Song Title");
+      binding.sTitleScroll.setSelected(true);
+      binding.sArtistScroll.setText("Artist");
+      binding.sTitleScroll.setSelected(true);
 
       storage = FirebaseStorage.getInstance();
       storageRef = storage.getReference();
@@ -120,13 +119,25 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       if(getArguments().get("type") != null)
          type = getArguments().get("type").toString();
 
+      Log.d("---", " [SongListFragment] Song List Type = " + type);
+      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, type, this);
+
+      binding.songlistRecyclerView.setAdapter(songListAdapter);
+
       binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
-            if(getArguments().get("playlistName") == null)
+            if(getArguments().get("playlistName") == null){
+               Log.d("---", "Back to HomeFragment");
+               if(player != null){
+                  player.stop();
+               }
+
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
-            else
+            }
+            else {
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new PlaylistFragment()).commit();
+            }
          }
       });
 
@@ -156,6 +167,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
          default:
             break;
       }
+
+      Log.d("---", "Initialize ExoPlayer.");
+      initializePlayer();
+
+
       return binding.getRoot();
    }
 
@@ -434,21 +450,39 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       binding.sTitleScroll.setText(songListModel.getSong().getSongName());
       binding.sArtistScroll.setText(songListModel.getArtistName());
 
-      String fileName = "hopeful-piano-112621.mp3";
-      storageRef.child(fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+      if(player != null){
+         player.stop();
+      }
+
+      String albumCoverName = songListModel.getSong().getSongName().split("\\.")[0] + ".png";
+      storageRef.child("albumcover/"+albumCoverName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 
          @Override
          public void onSuccess(Uri uri) {
-            DEFAULT_MEDIA_URI = uri.toString();
-            if (isOwner && player == null) {
-               startPlayer();
-               Log.d("---", "RecyclerSongListAdapter-player :  " + player);
-               Log.d("---", "RecyclerSongListAdapter-playerControlView :  " + playerControlView);
-               playerControlView.setPlayer(player);
-               playerControlView.show();
-            }
+            Log.d("---", "image URI : " + uri);
+            Glide.with(getActivity() ) //context
+                    .load(uri)
+                    .into(binding.albumImageScroll);
+         }
+      }).addOnFailureListener(new OnFailureListener() {
+         @Override
+         public void onFailure(@NonNull Exception e) {
+            Log.e("---", "Error: " + e);
+         }
+      });
 
-            Log.d("---", "URI : " + DEFAULT_MEDIA_URI);
+
+      String fileName = songListModel.getSong().getSongName();
+
+      storageRef.child("music/"+fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+         @Override
+         public void onSuccess(Uri uri) {
+            //DEFAULT_MEDIA_URI = uri.toString();
+            Log.d("---", "URI : " + uri.toString());
+            startPlayer(uri.toString());
+
+
          }
       }).addOnFailureListener(new OnFailureListener() {
          @Override
@@ -458,13 +492,31 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       });
    }
 
-   private void startPlayer() {
+   @Override
+   public void onPlayerStop() {
+      if(player != null){
+         player.stop();
+      }
+   }
+
+   private void initializePlayer(){
+      if(player == null){
+         player = new ExoPlayer.Builder(getActivity()).build();
+         Log.d("---", "Initialize Player. Player is created.");
+      }else{
+         Log.d("---", "Initialize Player. Player is alredy existed.");
+      }
+      playerControlView.setPlayer(player);
+      playerControlView.show();
+   }
+
+   private void startPlayer(String mediaUri) {
       //Bundle bundle = getArguments();
       Intent intent = null;
       Uri data = null;
       //String action = intent.getAction();
 
-      Log.d("---", "startPlayer play: uri - " + DEFAULT_MEDIA_URI);
+      Log.d("---", "startPlayer play: uri - " + mediaUri);
       //DEFAULT_MEDIA_URI = "https://firebasestorage.googleapis.com/v0/b/hkkofirstproject.appspot.com/o/hopeful-piano-112621.mp3?alt=media&token=00a85881-aaf7-4063-be78-db9b16dfc8e7";
 
       String action = "";
@@ -472,9 +524,8 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
               ACTION_VIEW.equals(action)
                       //? Assertions.checkNotNull(intent.getData())
                       ? Assertions.checkNotNull(data)
-                      : Uri.parse(DEFAULT_MEDIA_URI);
+                      : Uri.parse(mediaUri);
 
-      Log.d("---", "startPlayer play___#1____");
       DrmSessionManager drmSessionManager;
       if (intent != null && intent.hasExtra(DRM_SCHEME_EXTRA)) {
          String drmScheme = Assertions.checkNotNull(intent.getStringExtra(DRM_SCHEME_EXTRA));
@@ -491,11 +542,8 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
          drmSessionManager = DrmSessionManager.DRM_UNSUPPORTED;
       }
 
-      Log.d("---", "startPlayer play___#2____");
-      //DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(getActivity());
       DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(getActivity());
 
-      Log.d("---", "startPlayer play___#3____");
       MediaSource mediaSource;
       @C.ContentType int type = Util.inferContentType(uri, (intent == null ? null : intent.getStringExtra(EXTENSION_EXTRA)));
 
@@ -514,15 +562,12 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
          throw new IllegalStateException();
       }
 
-      Log.d("---", "startPlayer play___#5____");
       //ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
-      ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
+
       player.setMediaSource(mediaSource);
       player.prepare();
       player.play();
       player.setRepeatMode(Player.REPEAT_MODE_ALL);
-
-      this.player = player;
    }
 }
 

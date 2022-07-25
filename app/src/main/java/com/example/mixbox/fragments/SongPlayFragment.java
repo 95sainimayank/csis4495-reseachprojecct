@@ -12,8 +12,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.mixbox.MainActivity;
 import com.example.mixbox.R;
 import com.example.mixbox.databinding.FragmentSongListBinding;
@@ -36,6 +38,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.FirebaseDatabase;
@@ -50,7 +53,7 @@ public class SongPlayFragment extends Fragment {
 
     FirebaseDatabase db;
     FirebaseStorage storage;
-
+    String type;
     private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
     private static final String EXTENSION_EXTRA = "extension";
     private static final String DRM_SCHEME_EXTRA = "drm_scheme";
@@ -76,6 +79,9 @@ public class SongPlayFragment extends Fragment {
     // TODO: Rename and change types of parameters
     //private String mParam1;
     //private String mParam2;
+
+    //For test
+
 
     public SongPlayFragment() {
         // Required empty public constructor
@@ -110,34 +116,70 @@ public class SongPlayFragment extends Fragment {
         // Create a storage reference from our app
         StorageReference storageRef = storage.getReference();
 
+        type = "";
+        if(getArguments().get("type") != null)
+            type = getArguments().get("type").toString();
+
+        binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("---", "Back to play list");
+                if(player != null){
+                    player.stop();
+                }
+                //getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new SongListFragment()).commit();
+                Bundle bundle = new Bundle();
+                bundle.putString("type", type);
+                SongListFragment fragment = new SongListFragment();
+                fragment.setArguments(bundle);
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+            }
+        });
+
         TextView songTitle = binding.sTitle;
         TextView artistName = binding.sArtist;
+        ImageView albumCover = binding.albumImage;
+
         playerControlView = binding.playerControlView;
 
         //isOwner = getIntent().getBooleanExtra(OWNER_EXTRA, /* defaultValue= */ true);
         isOwner = true;
 
-        String title = getArguments().get("title").toString();
+        String sTitle = getArguments().get("title").toString();
         String artist = getArguments().get("artist").toString();
-        songTitle.setText(title);
+        songTitle.setText(sTitle);
+        songTitle.setSelected(true);
         artistName.setText(artist);
-
-
-        //[download_via_url]
-        String fileName = "hopeful-piano-112621.mp3";
-        storageRef.child(fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        artistName.setSelected(true);
+        String albumCoverName = getArguments().get("albumCover").toString();
+        storageRef.child("albumcover/"+albumCoverName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 
             @Override
             public void onSuccess(Uri uri) {
-                DEFAULT_MEDIA_URI = uri.toString();
-               if (isOwner && player == null) {
-                   startPlayer();
-                   Log.d("---", "SongPlayFragment-player :  " + player);
-                   playerControlView.setPlayer(player);
-                   playerControlView.show();
-               }
+                Log.d("---", "image URI : " + uri);
+                Glide.with(getActivity() ) //context
+                        .load(uri)
+                        .into(binding.albumImage);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("---", "Error: " + e);
+            }
+        });
 
-                Log.d("---", "URI : " + DEFAULT_MEDIA_URI);
+        Log.d("---", "Initialize ExoPlayer.");
+        initializePlayer();
+
+        String fileName = sTitle;
+        Log.d("---", "song title : " + sTitle);
+        //If you already have download infrastructure based around URLs, or just want a URL to share, you can get the download URL for a file by calling the getDownloadUrl() method on a Cloud Storage reference.
+        storageRef.child("music/"+ fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.d("---", "URI : " + uri.toString());
+                startPlayer(uri.toString());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -184,14 +226,24 @@ public class SongPlayFragment extends Fragment {
        // }
     }
 
+    private void initializePlayer(){
+        if(player == null){
+            player = new ExoPlayer.Builder(getActivity()).build();
+            Log.d("---", "Initialize Player. Player is created.");
+        }else{
+            Log.d("---", "Initialize Player. Player is alredy existed.");
+        }
+        playerControlView.setPlayer(player);
+        playerControlView.show();
+    }
 
-    private void startPlayer() {
+    private void startPlayer(String mediaUri) {
         //Bundle bundle = getArguments();
         Intent intent = null;
         Uri data = null;
         //String action = intent.getAction();
 
-        Log.d("---", "initializePalyer play: uri - " + DEFAULT_MEDIA_URI);
+        Log.d("---", "startPlayer play: uri - " + mediaUri);
         //DEFAULT_MEDIA_URI = "https://firebasestorage.googleapis.com/v0/b/hkkofirstproject.appspot.com/o/hopeful-piano-112621.mp3?alt=media&token=00a85881-aaf7-4063-be78-db9b16dfc8e7";
 
         String action = "";
@@ -199,7 +251,8 @@ public class SongPlayFragment extends Fragment {
                 ACTION_VIEW.equals(action)
                         //? Assertions.checkNotNull(intent.getData())
                         ? Assertions.checkNotNull(data)
-                        : Uri.parse(DEFAULT_MEDIA_URI);
+                        : Uri.parse(mediaUri);
+
         DrmSessionManager drmSessionManager;
         if (intent != null && intent.hasExtra(DRM_SCHEME_EXTRA)) {
             String drmScheme = Assertions.checkNotNull(intent.getStringExtra(DRM_SCHEME_EXTRA));
@@ -217,8 +270,11 @@ public class SongPlayFragment extends Fragment {
         }
 
         DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(getActivity());
+
         MediaSource mediaSource;
         @C.ContentType int type = Util.inferContentType(uri, (intent == null ? null : intent.getStringExtra(EXTENSION_EXTRA)));
+
+        Log.d("---", "startPlayer play___#4 type:" + Integer.toString(type) + "---");
         if (type == C.TYPE_DASH) {
             mediaSource =
                     new DashMediaSource.Factory(dataSourceFactory)
@@ -232,14 +288,13 @@ public class SongPlayFragment extends Fragment {
         } else {
             throw new IllegalStateException();
         }
-        ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
+
+        //ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
+
         player.setMediaSource(mediaSource);
         player.prepare();
         player.play();
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
-
-        this.player = player;
     }
-
 
 }

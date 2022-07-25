@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_songListFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_songListToHome_to_SongPlayFragment2"
+            app:destination="@id/SongPlayFragment" />
     </fragment>
     <fragment
         android:id="@+id/homeFragment"
@@ -26,6 +29,15 @@
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/homeToSongList"
+            app:destination="@id/songListToHome" />
+    </fragment>
+    <fragment
+        android:id="@+id/SongPlayFragment"
+        android:name="com.example.mixbox.fragments.SongPlayFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_song_play" >
+        <action
+            android:id="@+id/action_SongPlayFragment_to_songListToHome"
             app:destination="@id/songListToHome" />
     </fragment>
     <activity

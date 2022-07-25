@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.mixbox.R;
 
 import androidx.cardview.widget.CardView;
@@ -57,6 +59,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,11 +67,13 @@ import java.util.UUID;
 
 public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongListAdapter.ViewHolder> {
    private Context context;
+   String type;
    ArrayList<SongListModel> songList;
    FirebaseDatabase db;
    String currentUserEmail;
    OnSongClickListener listener;
-
+   FirebaseStorage storage;
+   StorageReference storageRef;
    /*
    FirebaseStorage storage;
    StorageReference storageRef;
@@ -86,10 +91,11 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
    private static String DEFAULT_MEDIA_URI = "";
    */
 
-   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, OnSongClickListener listener){
+   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, String type, OnSongClickListener listener){
         this.context = context;
         this.songList = songList;
         this.listener = listener;
+        this.type = type;
     }
 
    @NonNull
@@ -98,7 +104,8 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.song_list_item2, parent, false);
       ViewHolder viewHolder = new ViewHolder(v);
       db = FirebaseDatabase.getInstance();
-
+      storage = FirebaseStorage.getInstance();
+      storageRef = storage.getReference();
       FirebaseAuth auth = FirebaseAuth.getInstance();
       currentUserEmail = auth.getCurrentUser().getEmail().toString();
 
@@ -120,36 +127,33 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       holder.songTitle.setText(songItem.getSong().getSongName());
       holder.playCount.setText(Integer.toString(songItem.getSong().getTimesPlayed()));
 
+      String albumCoverName = songItem.getSong().getSongName().split("\\.")[0] + ".png";
+      Log.d("---", "album name: " + albumCoverName);
+
+      storageRef.child("albumcover/"+albumCoverName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+         @Override
+         public void onSuccess(Uri uri) {
+            Log.d("---", "image URI : " + uri);
+            Glide.with(context ) //context
+                    .load(uri)
+                    .into(holder.imageView);
+
+         }
+      }).addOnFailureListener(new OnFailureListener() {
+         @Override
+         public void onFailure(@NonNull Exception e) {
+            Log.e("---", "Error: " + e);
+         }
+      });
+
+
       holder.cardView.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
             if(listener != null){
                listener.onSongClick(songItem);
-               /*
-               String fileName = "hopeful-piano-112621.mp3";
-               storageRef.child(fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-
-                  @Override
-                  public void onSuccess(Uri uri) {
-                     DEFAULT_MEDIA_URI = uri.toString();
-                     if (isOwner && player == null) {
-                        startPlayer();
-                        Log.d("---", "RecyclerSongListAdapter-player :  " + player);
-                        Log.d("---", "RecyclerSongListAdapter-playerControlView :  " + holder.playerControlView);
-                        holder.playerControlView.setPlayer(player);
-                        holder.playerControlView.show();
-                     }
-
-                     Log.d("---", "URI : " + DEFAULT_MEDIA_URI);
-                  }
-               }).addOnFailureListener(new OnFailureListener() {
-                  @Override
-                  public void onFailure(@NonNull Exception e) {
-                     Log.e("---", "Error: " + e);
-                  }
-               });
-            */
-            }
+             }
          }
       });
 
@@ -167,9 +171,14 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                   switch (item.getItemId()) {
                      case R.id.play:
                         //handle menu1 click
+                        listener.onPlayerStop();
                         Bundle bundle = new Bundle();
+                        bundle.putString("type", type);
+                        Log.d("---", " [RecyclerSongListAdapter] Song List Type = " + type);
                         bundle.putString("title", songItem.getSong().getSongName());
                         bundle.putString("artist", songItem.getArtistName());
+                        String albumCoverName = songItem.getSong().getSongName().split("\\.")[0] + ".png";
+                        bundle.putString("albumCover",albumCoverName);
                         SongPlayFragment fragment = new SongPlayFragment();
                         fragment.setArguments(bundle);
                         ((FragmentActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
@@ -329,6 +338,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
        TextView playCount;
        TextView menuOptions;
        CardView cardView;
+       ImageView imageView;
 
        public ViewHolder(@NonNull View itemView) {
           super(itemView);
@@ -337,6 +347,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
           menuOptions = itemView.findViewById(R.id.menu_options);
           playCount = itemView.findViewById(R.id.play_count);
           cardView = itemView.findViewById(R.id.card_view);
+          imageView = itemView.findViewById(R.id.music_image);
        }
 
     }
