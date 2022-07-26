@@ -218,7 +218,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                      }
 
                      songListAdapter.notifyDataSetChanged();
-                  }
+                  }  
 
                }
             } else {
