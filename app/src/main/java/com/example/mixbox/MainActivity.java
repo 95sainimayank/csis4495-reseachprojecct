@@ -15,6 +15,7 @@ import com.example.mixbox.fragments.EventFragment;
 import com.example.mixbox.fragments.PlaylistFragment;
 import com.example.mixbox.fragments.SearchSongFragment;
 import com.example.mixbox.fragments.SongListFragment;
+import com.example.mixbox.fragments.UploadSongFragment;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
                   return true;
                case R.id.nav_events:
                   getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new EventFragment()).commit();
+                  drawer.closeDrawer(Gravity.LEFT);
+                  return true;
+               case R.id.nav_upload:
+                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UploadSongFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
                case R.id.nav_favorite:
