@@ -4,8 +4,12 @@ import com.example.mixbox.model.OuterClass;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface AppService {
-   @GET("/discovery/v2/events?apikey=WoxMvvr1Q3d6mpyCG3n67BwAD55NNUcZ&locale=*&city=Burnaby&countryCode=CA&preferredCountry=%20ca")
-   Call<OuterClass> getAll();
+   @GET("/discovery/v2/events")
+   Call<OuterClass> getByCity(@Query("apikey")String apikey, @Query("locale") String locale, @Query("city") String city);
+
 }
+//@GET("/discovery/v2/events?apikey=WoxMvvr1Q3d6mpyCG3n67BwAD55NNUcZ&locale=*&city={newCity}")

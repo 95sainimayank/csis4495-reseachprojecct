@@ -1,6 +1,6 @@
 package com.example.mixbox.model;
 
-import android.location.Location;
+
 
 public class Venue {
    private String name;

@@ -8,10 +8,12 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.mixbox.R;
 import com.example.mixbox.adapter.PlaylistAdapter;
 import com.example.mixbox.databinding.FragmentPlaylistBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,18 +43,27 @@ public class PlaylistFragment extends Fragment {
    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       binding = FragmentPlaylistBinding.inflate(inflater, container, false);
 
+      binding.playlistTool.setNavigationOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View view) {
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
+         }
+      });
+
       db = FirebaseDatabase.getInstance();
       auth = FirebaseAuth.getInstance();
       allPlaylists = new ArrayList<>();
 
       binding.playlistRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-      adapter = new PlaylistAdapter(allPlaylists, "", getActivity(), "playlist");
+      adapter = new PlaylistAdapter(allPlaylists, "", getActivity(), "playlist", "");
 
       binding.playlistRecycler.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
 
       binding.playlistRecycler.setAdapter(adapter);
 
       getAllPlaylists();
+
+
 
       binding.btnAddPlaylist.setOnClickListener(new View.OnClickListener() {
          @Override
