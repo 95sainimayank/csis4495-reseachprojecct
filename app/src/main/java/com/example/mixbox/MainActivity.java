@@ -12,6 +12,8 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.mixbox.fragments.EventFragment;
+import com.example.mixbox.fragments.HomeFragment;
+import com.example.mixbox.fragments.MapsFragment;
 import com.example.mixbox.fragments.PlaylistFragment;
 import com.example.mixbox.fragments.SearchSongFragment;
 import com.example.mixbox.fragments.SongListFragment;
@@ -43,12 +45,16 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             switch (id) {
+               case R.id.home:
+                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
+                  drawer.closeDrawer(Gravity.LEFT);
+                  return true;
                case R.id.nav_search:
                   getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new SearchSongFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
                case R.id.nav_events:
-                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new EventFragment()).commit();
+                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new MapsFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
                case R.id.nav_upload:

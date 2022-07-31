@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,11 +39,13 @@ public class PlaylistDialog extends AppCompatDialogFragment {
    List<String> allPlaylists;
    FirebaseDatabase db;
    FirebaseAuth auth;
+   String action;
 
-   public PlaylistDialog(Context ctx, String songName) {
+   public PlaylistDialog(Context ctx, String songName, String ac) {
       context = ctx;
       this.sName = songName;
       allPlaylists = new ArrayList<>();
+      action = ac;
    }
 
    @NonNull
@@ -58,7 +61,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
 
       recyclerView = view.findViewById(R.id.playlistRecyclerView);
 
-      builder.setView(view).setTitle("Add to playlist");
+      builder.setView(view).setTitle("Add/Remove");
 
       getAllPlayLists();
       return builder.create();
@@ -92,7 +95,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
 
                      recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
                      recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                     PlaylistAdapter adapter = new PlaylistAdapter(allPlaylists, sName, getActivity(), "dialog");
+                     PlaylistAdapter adapter = new PlaylistAdapter(allPlaylists, sName, getActivity(), "dialog", action);
                      recyclerView.setAdapter(adapter);
 
                      break;

@@ -23,7 +23,6 @@ public class PlaylistSongsFragment extends Fragment {
    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
       binding = FragmentPlaylistSongsBinding.inflate(inflater, container, false);
 
-
       binding.playlistToolbar.setNavigationOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {

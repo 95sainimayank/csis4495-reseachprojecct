@@ -1,7 +1,6 @@
 package com.example.mixbox.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,28 +26,10 @@ import androidx.cardview.widget.CardView;
 
 import com.example.mixbox.fragments.OnSongClickListener;
 
+import com.example.mixbox.fragments.SongListFragment;
 import com.example.mixbox.fragments.SongPlayFragment;
-import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
 import com.example.mixbox.utilities.PlaylistDialog;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
-import com.google.android.exoplayer2.drm.DrmSessionManager;
-import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
-import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.ui.PlayerControlView;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.HttpDataSource;
-import com.google.android.exoplayer2.util.Assertions;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -59,8 +40,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.File;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -191,6 +170,10 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         break;
                      case R.id.addToPlaylist:
                         addToPlaylist(songItem.getSong().getSongName());
+                        break;
+                     case R.id.removeFromPlaylist:
+                        removeFromPlaylist(songItem.getSong().getSongName());
+                        break;
                   }
                   return false;
                }
@@ -201,10 +184,16 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       });
    }
 
-   private void addToPlaylist(String songName) {
-      PlaylistDialog dialog = new PlaylistDialog(context, songName);
+   private void removeFromPlaylist(String songName) {
+      PlaylistDialog dialog = new PlaylistDialog(context, songName, "Remove");
       FragmentActivity f = (FragmentActivity)context;
-      dialog.show(f.getSupportFragmentManager(), "Hello");
+      dialog.show(f.getSupportFragmentManager(), "Remove from playlist");
+   }
+
+   private void addToPlaylist(String songName) {
+      PlaylistDialog dialog = new PlaylistDialog(context, songName, "Add");
+      FragmentActivity f = (FragmentActivity)context;
+      dialog.show(f.getSupportFragmentManager(), "Add to Playlist");
    }
 
    private void removeFromFavorite(String songName) {
@@ -248,6 +237,14 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                               public void onComplete(@NonNull Task<Void> task) {
                                  if(task.isSuccessful()){
                                     Toast.makeText(context, "Successfully removed from favorites!", Toast.LENGTH_SHORT).show();
+
+                                    AppCompatActivity activity = (AppCompatActivity) context;
+
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("type", "favorite");
+                                    SongListFragment fragment = new SongListFragment();
+                                    fragment.setArguments(bundle);
+                                    activity.getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
                                  }
                                  else{
                                     Toast.makeText(context, "Failed to add to favorite! Try again later!", Toast.LENGTH_SHORT).show();

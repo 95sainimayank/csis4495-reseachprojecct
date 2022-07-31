@@ -3,6 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
+    <item android:title="Home">
+        <menu>
+            <item
+                android:id="@+id/home"
+                android:icon="@drawable/ic_baseline_home_24"
+                android:title="Home" />
+        </menu>
+    </item>
+
     <item android:title="Event">
         <menu>
             <item

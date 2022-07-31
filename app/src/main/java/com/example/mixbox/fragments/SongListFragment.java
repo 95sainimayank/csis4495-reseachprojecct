@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -53,35 +54,30 @@ import com.google.firebase.storage.StorageReference;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import androidx.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
 
-
 public class SongListFragment extends Fragment implements OnSongClickListener {
+   private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
+   private static final String EXTENSION_EXTRA = "extension";
+   private static final String DRM_SCHEME_EXTRA = "drm_scheme";
+   private static final String DRM_LICENSE_URL_EXTRA = "drm_license_url";
+   private static final String OWNER_EXTRA = "owner";
+   @Nullable
+   private static ExoPlayer player;
+   private static String DEFAULT_MEDIA_URI = "";
    FragmentSongListBinding binding;
    FirebaseDatabase db;
    ArrayList<SongListModel> allSongListItems;
    RecyclerSongListAdapter songListAdapter;
    FirebaseAuth auth;
    ArrayList<SongListModel> allSongs;
-
    //For Player -------------------------------------------------start
    FirebaseStorage storage;
    StorageReference storageRef;
-   @Nullable
-   private static ExoPlayer player;
    private boolean isOwner;
    @Nullable
    private PlayerControlView playerControlView;
-
-   private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
-   private static final String EXTENSION_EXTRA = "extension";
-   private static final String DRM_SCHEME_EXTRA = "drm_scheme";
-   private static final String DRM_LICENSE_URL_EXTRA = "drm_license_url";
-   private static final String OWNER_EXTRA = "owner";
-   private static String DEFAULT_MEDIA_URI = "";
    //For Player -------------------------------------------------end
 
    public SongListFragment() {
@@ -99,7 +95,6 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       Log.d("---", "onCreateView in SongListFragment.");
       db = FirebaseDatabase.getInstance();
       auth = FirebaseAuth.getInstance();
-      binding.songlistRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
       allSongListItems = new ArrayList<>();
       allSongs = new ArrayList<>();
@@ -116,10 +111,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
       String type = "";
 
-      if(getArguments().get("type") != null)
+      if (getArguments().get("type") != null)
          type = getArguments().get("type").toString();
 
       Log.d("---", " [SongListFragment] Song List Type = " + type);
+      binding.songlistRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
       songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, type, this);
 
       binding.songlistRecyclerView.setAdapter(songListAdapter);
@@ -127,21 +123,20 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
-            if(getArguments().get("playlistName") == null){
+            if (getArguments().get("playlistName") == null) {
                Log.d("---", "Back to HomeFragment");
-               if(player != null){
+               if (player != null) {
                   player.stop();
                }
 
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
-            }
-            else {
+            } else {
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new PlaylistFragment()).commit();
             }
          }
       });
 
-      if(getArguments().get("playlistName") != null){
+      if (getArguments().get("playlistName") != null) {
          getAllSongs("playlist");
          showPlaylistSongs(getArguments().get("playlistName").toString());
       }
@@ -163,7 +158,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
             showSongBasedOnMainCards("mostPlayed");
             break;
          case "favorite":
-            getAllSongs("favorite");
+            showFavoriteList();
          default:
             break;
       }
@@ -200,12 +195,12 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
                               HashMap<String, Object> songs = (HashMap<String, Object>) eachPlaylist.get("songs");
 
-                              if(songs != null){
-                                 for(Object obj : songs.values()){
+                              if (songs != null) {
+                                 for (Object obj : songs.values()) {
                                     String songName = obj.toString();
 
-                                    for(int i = 0; i < allSongs.size(); i++){
-                                       if(allSongs.get(i).getSong().getSongName().equals(songName)){
+                                    for (int i = 0; i < allSongs.size(); i++) {
+                                       if (allSongs.get(i).getSong().getSongName().equals(songName)) {
                                           allSongListItems.add(allSongs.get(i));
                                        }
                                     }
@@ -218,7 +213,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                      }
 
                      songListAdapter.notifyDataSetChanged();
-                  }  
+                  }
 
                }
             } else {
@@ -274,15 +269,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                      }
                   }
                }
-
             } else {
                Log.e("---", task.getException().toString());
             }
          }
       });
-
-      if(val.equals("favorite"))
-         showFavoriteList();
    }
 
    public void showSongBasedOnCategory(String category) {
@@ -405,43 +396,86 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                for (Object value : allUsers.values()) {
                   HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
 
-                  if (eachUser.get("email").equals(email)) {
-                     HashMap<String, Object> favoriteSongsFromDb = (HashMap<String, Object>) eachUser.get("favoriteSongs");
+                  HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("songs");
 
-                     if (favoriteSongsFromDb != null) {
-                        for (Object song : favoriteSongsFromDb.values()) {
-                          String songName = song.toString();
+                  if (eachUserSongs != null) {
+                     for (Object song : eachUserSongs.values()) {
+                        HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
 
-                          for(SongListModel s : allSongs){
-                             if(s.getSong().getSongName().equals(songName)){
-                                SongListModel recyclerViewModelObject = new SongListModel();
+                        SongListModel recyclerViewModelObject = new SongListModel();
 
-                                String name = eachUser.get("fullName").toString();
-                                recyclerViewModelObject.setArtistName(name);
+                        String name = eachUser.get("fullName").toString();
+                        recyclerViewModelObject.setArtistName(name);
 
-                                recyclerViewModelObject.
-                                  setSong(new Song(s.getSong().getSongName().toString(),
-                                    s.getSong().getTimesPlayed(),
-                                    LocalDateTime.parse(s.getSong().getDateTime().toString()),
-                                    null));
+                        recyclerViewModelObject.
+                          setSong(new Song(eachSong.get("songName").toString(),
+                            Integer.parseInt(eachSong.get("timesPlayed").toString()),
+                            LocalDateTime.parse(eachSong.get("dateTime").toString()),
+                            null));
 
-                                allSongListItems.add(recyclerViewModelObject);
-                                return;
-                             }
-                          }
-                        }
-                     } else {
-                        Toast.makeText(getActivity(), "No Favorite song present !!", Toast.LENGTH_SHORT).show();
+                        allSongs.add(recyclerViewModelObject);
+
                      }
                   }
                }
 
-               songListAdapter.notifyDataSetChanged();
+               db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                  @Override
+                  public void onComplete(@NonNull Task<DataSnapshot> task) {
+                     if (task.isSuccessful()) {
+                        DataSnapshot snapshot = task.getResult();
+                        HashMap<String, Object> outerMapFav = (HashMap<String, Object>) snapshot.getValue();
+                        HashMap<String, Object> allUsersFav = (HashMap<String, Object>) outerMapFav.get("allUsers");
+
+
+                        for (Object value : allUsersFav.values()) {
+                           HashMap<String, Object> eachUserFav = (HashMap<String, Object>) value;
+
+                           if (eachUserFav.get("email").equals(email)) {
+                              HashMap<String, Object> favoriteSongsFromDbFav = (HashMap<String, Object>) eachUserFav.get("favoriteSongs");
+
+
+                              if (favoriteSongsFromDbFav != null) {
+
+                                 for (Object song : favoriteSongsFromDbFav.values()) {
+                                    String songName = song.toString();
+
+                                    for (SongListModel s : allSongs) {
+                                       if (s.getSong().getSongName().equals(songName)) {
+                                          SongListModel recyclerViewModelObject = new SongListModel();
+
+                                          String name = eachUserFav.get("fullName").toString();
+                                          recyclerViewModelObject.setArtistName(name);
+
+                                          recyclerViewModelObject.
+                                            setSong(new Song(s.getSong().getSongName().toString(),
+                                              s.getSong().getTimesPlayed(),
+                                              LocalDateTime.parse(s.getSong().getDateTime().toString()),
+                                              null));
+
+                                          allSongListItems.add(recyclerViewModelObject);
+                                       }
+                                    }
+                                 }
+                              } else {
+                                 Toast.makeText(getActivity(), "No Favorite song present !!", Toast.LENGTH_SHORT).show();
+                              }
+                           }
+                        }
+
+                        songListAdapter.notifyDataSetChanged();
+                     } else {
+                        Log.e("---", task.getException().toString());
+                     }
+                  }
+               });
+
             } else {
                Log.e("---", task.getException().toString());
             }
          }
       });
+
 
    }
 
@@ -450,19 +484,19 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       binding.sTitleScroll.setText(songListModel.getSong().getSongName());
       binding.sArtistScroll.setText(songListModel.getArtistName());
 
-      if(player != null){
+      if (player != null) {
          player.stop();
       }
 
       String albumCoverName = songListModel.getSong().getSongName().split("\\.")[0] + ".png";
-      storageRef.child("albumcover/"+albumCoverName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+      storageRef.child("albumcover/" + albumCoverName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 
          @Override
          public void onSuccess(Uri uri) {
             Log.d("---", "image URI : " + uri);
-            Glide.with(getActivity() ) //context
-                    .load(uri)
-                    .into(binding.albumImageScroll);
+            Glide.with(getActivity()) //context
+              .load(uri)
+              .into(binding.albumImageScroll);
          }
       }).addOnFailureListener(new OnFailureListener() {
          @Override
@@ -474,7 +508,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
       String fileName = songListModel.getSong().getSongName();
 
-      storageRef.child("music/"+fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+      storageRef.child("music/" + fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
 
          @Override
          public void onSuccess(Uri uri) {
@@ -494,16 +528,16 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
    @Override
    public void onPlayerStop() {
-      if(player != null){
+      if (player != null) {
          player.stop();
       }
    }
 
-   private void initializePlayer(){
-      if(player == null){
+   private void initializePlayer() {
+      if (player == null) {
          player = new ExoPlayer.Builder(getActivity()).build();
          Log.d("---", "Initialize Player. Player is created.");
-      }else{
+      } else {
          Log.d("---", "Initialize Player. Player is alredy existed.");
       }
       playerControlView.setPlayer(player);
@@ -521,10 +555,10 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
       String action = "";
       Uri uri =
-              ACTION_VIEW.equals(action)
-                      //? Assertions.checkNotNull(intent.getData())
-                      ? Assertions.checkNotNull(data)
-                      : Uri.parse(mediaUri);
+        ACTION_VIEW.equals(action)
+          //? Assertions.checkNotNull(intent.getData())
+          ? Assertions.checkNotNull(data)
+          : Uri.parse(mediaUri);
 
       DrmSessionManager drmSessionManager;
       if (intent != null && intent.hasExtra(DRM_SCHEME_EXTRA)) {
@@ -533,11 +567,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
          UUID drmSchemeUuid = Assertions.checkNotNull(Util.getDrmUuid(drmScheme));
          HttpDataSource.Factory licenseDataSourceFactory = new DefaultHttpDataSource.Factory();
          HttpMediaDrmCallback drmCallback =
-                 new HttpMediaDrmCallback(drmLicenseUrl, licenseDataSourceFactory);
+           new HttpMediaDrmCallback(drmLicenseUrl, licenseDataSourceFactory);
          drmSessionManager =
-                 new DefaultDrmSessionManager.Builder()
-                         .setUuidAndExoMediaDrmProvider(drmSchemeUuid, FrameworkMediaDrm.DEFAULT_PROVIDER)
-                         .build(drmCallback);
+           new DefaultDrmSessionManager.Builder()
+             .setUuidAndExoMediaDrmProvider(drmSchemeUuid, FrameworkMediaDrm.DEFAULT_PROVIDER)
+             .build(drmCallback);
       } else {
          drmSessionManager = DrmSessionManager.DRM_UNSUPPORTED;
       }
@@ -550,14 +584,14 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       Log.d("---", "startPlayer play___#4 type:" + Integer.toString(type) + "---");
       if (type == C.TYPE_DASH) {
          mediaSource =
-                 new DashMediaSource.Factory(dataSourceFactory)
-                         .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
-                         .createMediaSource(MediaItem.fromUri(uri));
+           new DashMediaSource.Factory(dataSourceFactory)
+             .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
+             .createMediaSource(MediaItem.fromUri(uri));
       } else if (type == C.TYPE_OTHER) {
          mediaSource =
-                 new ProgressiveMediaSource.Factory(dataSourceFactory)
-                         .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
-                         .createMediaSource(MediaItem.fromUri(uri));
+           new ProgressiveMediaSource.Factory(dataSourceFactory)
+             .setDrmSessionManagerProvider(unusedMediaItem -> drmSessionManager)
+             .createMediaSource(MediaItem.fromUri(uri));
       } else {
          throw new IllegalStateException();
       }
