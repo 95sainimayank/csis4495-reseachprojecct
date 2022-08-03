@@ -257,7 +257,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Custom
                bundle.putString("playlistName", allPlaylists.get(position));
                SongListFragment songListFragment = new SongListFragment();
                songListFragment.setArguments(bundle);
-
                ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, songListFragment).commit();
             }
          }
