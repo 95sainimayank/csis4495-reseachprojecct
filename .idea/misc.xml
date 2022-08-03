@@ -7,12 +7,20 @@
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/activity_signup.xml" value="0.3796875" />
 <<<<<<< HEAD
+<<<<<<< HEAD
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_event.xml" value="0.3796875" />
 =======
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/custom_info_window.xml" value="0.5" />
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_event.xml" value="0.25" />
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_favorites.xml" value="0.3796875" />
 >>>>>>> ce1494d932ba7f705011a2295c9fd3080e9a36d8
+=======
+
+        <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/custom_info_window.xml" value="0.5" />
+        <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_event.xml" value="0.25" />
+        <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_favorites.xml" value="0.3796875" />
+
+>>>>>>> 1801e1317643cf5033416deab4d10ccc654eb4fb
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_home.xml" value="0.3796875" />
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_search_song.xml" value="0.33" />
         <entry key="..\:/Douglas/Classes/_4495_Research/Mixbox/app/src/main/res/layout/fragment_song_list.xml" value="0.3796875" />
