@@ -41,7 +41,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="40dp"
                 android:gravity="center_vertical"
-                android:text="Songs List"
+                android:text="Song Play"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
         </androidx.appcompat.widget.Toolbar>
