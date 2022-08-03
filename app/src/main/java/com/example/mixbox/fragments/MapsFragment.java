@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.mixbox.R;
+import com.example.mixbox.adapter.CustomInfoWindowAdapter;
 import com.example.mixbox.connection.RetroConnection;
 import com.example.mixbox.databinding.FragmentMapsBinding;
 import com.example.mixbox.model.MusicEvent;
@@ -95,6 +96,9 @@ public class MapsFragment extends Fragment {
                               }
                            }
 
+                           googleMap
+                             .setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
+
                            Object[] objects = allEvents.keySet().toArray();
                            LatLng latlang = null;
                            for (Object obj : objects) {
@@ -108,14 +112,22 @@ public class MapsFragment extends Fragment {
                                        latlang = new LatLng(Double.parseDouble(v.getLocation().getLatitude())
                                          , Double.parseDouble(v.getLocation().getLongitude()));
 
-                                       googleMap.addMarker(new MarkerOptions()
-                                         .position(latlang).title(e.getUrl()));
-                                    }
+                                       String snippet = "";
 
+                                       if(e.getDates() != null){
+                                          snippet = "Date - " + e.getDates().getStart().getLocalDate() + "\nTime - " + e.getDates().getStart().getLocalTime();
+                                       }
+
+                                       googleMap
+                                         .addMarker(new MarkerOptions()
+                                         .position(latlang)
+                                         .title(e.getName())
+                                         .snippet(snippet));
+                                    }
                                  }
 
                                  if(latlang != null)
-                                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latlang));
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlang, 11));
                               }
                            }
 
@@ -134,9 +146,6 @@ public class MapsFragment extends Fragment {
             }
          });
 
-//         LatLng sydney = new LatLng(-34, 151);
-//         googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//         googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
       }
    };
 

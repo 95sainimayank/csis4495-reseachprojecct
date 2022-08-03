@@ -17,6 +17,7 @@ import com.example.mixbox.fragments.MapsFragment;
 import com.example.mixbox.fragments.PlaylistFragment;
 import com.example.mixbox.fragments.SearchSongFragment;
 import com.example.mixbox.fragments.SongListFragment;
+import com.example.mixbox.fragments.UploadFragment;
 import com.example.mixbox.fragments.UploadSongFragment;
 import com.google.android.material.navigation.NavigationView;
 
@@ -58,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
                case R.id.nav_upload:
-                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UploadSongFragment()).commit();
+//                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UploadSongFragment()).commit();
+                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UploadFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
                case R.id.nav_favorite:

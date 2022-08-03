@@ -51,7 +51,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -356,10 +360,36 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                         String name = eachUser.get("fullName").toString();
                         recyclerViewModelObject.setArtistName(name);
 
+
+                        String d = "";
+
+                        Log.e("hahahaha", eachSong.get("dateTime").toString());
+
+                        JSONObject jobj = new JSONObject();
+                        try {
+                           jobj = new JSONObject(eachSong.get("dateTime").toString());
+                        } catch (JSONException e) {
+                           e.printStackTrace();
+                        }
+
+                        try {
+                           int ho = 0;
+                           if(Integer.parseInt(jobj.getString("hour")) > 12){
+                              ho = Integer.parseInt(jobj.getString("hour")) - 12;
+                           }
+
+                           d = jobj.getString("year") + "-"+
+                             jobj.getString("monthValue") + "-" + jobj.getString("dayOfMonth") + " " + ho + ":" + jobj.getString("minute");
+                        } catch (JSONException e) {
+                           Log.e("hahah", e.getMessage().toString());
+                        }
+
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+
                         recyclerViewModelObject.
                           setSong(new Song(eachSong.get("songName").toString(),
                             Integer.parseInt(eachSong.get("timesPlayed").toString()),
-                            LocalDateTime.parse(eachSong.get("dateTime").toString()),
+                            LocalDateTime.parse(d, formatter),
                             null));
 
                         allSongListItems.add(recyclerViewModelObject);
