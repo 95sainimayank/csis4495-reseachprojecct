@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.SearchSongFragment">
+    android:gravity="bottom"
+    android:id="@+id/search_sliding_panel"
+    tools:context=".fragments.SearchSongFragment"
+    sothree:umanoPanelHeight="168dp"
+    sothree:umanoShadowHeight="6dp"
+    sothree:umanoParallaxOffset="100dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/search_first_layout">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/searchSongToolbar"
@@ -58,4 +70,82 @@
         app:layout_constraintBaseline_toBaselineOf="@+id/songText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/songText" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/search_second_layout"
+        android:background="@color/black"
+        android:padding="6dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/search_sTitleScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="@string/playSongTitle"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/search_album_imageScroll" />
+
+            <TextView
+                android:id="@+id/search_sArtistScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:layout_marginBottom="8dp"
+                android:text="@string/playSongArtist"
+                android:textColor="@color/teal_200"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/search_sTitleScroll"
+                app:layout_constraintTop_toBottomOf="@+id/search_sTitleScroll" />
+
+            <com.google.android.exoplayer2.ui.PlayerControlView
+                android:id="@+id/search_player_control_viewScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                app:show_timeout="0"/>
+
+
+            <ImageView
+                android:id="@+id/search_album_imageScroll"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/album"
+                tools:srcCompat="@drawable/album" />
+        </LinearLayout>
+
+    </FrameLayout>
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>
