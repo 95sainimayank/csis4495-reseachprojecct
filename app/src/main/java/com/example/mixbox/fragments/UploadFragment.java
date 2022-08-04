@@ -1,7 +1,6 @@
 package com.example.mixbox.fragments;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -22,12 +20,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
 import com.example.mixbox.databinding.FragmentUpload2Binding;
-import com.example.mixbox.model.AllUserData;
 import com.example.mixbox.model.Song;
-import com.example.mixbox.model.SongListModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -40,17 +35,9 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.lang.reflect.Array;
-import java.net.URLConnection;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class UploadFragment extends Fragment {
@@ -281,106 +268,6 @@ public class UploadFragment extends Fragment {
 
    //working
    private void updateInDb(String s, ArrayList<String> inputGenres) {
-      if(songNameExists(s)){
-         Toast.makeText(getActivity(), "Change song file name. Name already exists.", Toast.LENGTH_SHORT).show();
-      }
-      else{
-         db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-               if(task.isSuccessful()){
-                  DataSnapshot snapshot = task.getResult();
-                  HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
-                  HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
-
-                  Object[] allUsersKeys = allUsers.keySet().toArray();
-
-                  for(Object eachUserKey : allUsersKeys){
-                     HashMap<String, Object> eachUser = (HashMap<String, Object>) allUsers.get(eachUserKey);
-
-                     if(eachUser.get("email").equals(auth.getCurrentUser().getEmail())){
-                        Song song = new Song(s, 0, LocalDateTime.now(), null);
-
-                        db.getReference().child("allUsers").child(eachUserKey.toString()).child("songs").push().setValue(song).addOnCompleteListener(new OnCompleteListener<Void>() {
-                           @Override
-                           public void onComplete(@NonNull Task<Void> task) {
-                              if(task.isSuccessful()){
-                                 Log.e("---", "Song Added successfully");
-                              }
-                              else{
-                                 Log.e("---", "Failed to add song");
-                              }
-                           }
-                        });
-
-                        db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                           @Override
-                           public void onComplete(@NonNull Task<DataSnapshot> task) {
-                              if (task.isSuccessful()) {
-                                 DataSnapshot snapshot = task.getResult();
-                                 HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
-                                 HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
-
-                                 for (Object value : allUsers.values()) {
-                                    HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
-
-                                    HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("songs");
-
-                                    if (eachUserSongs != null) {
-                                       for (Object song : eachUserSongs.values()) {
-                                          HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
-
-                                          if(eachSong.get("songName").equals(s)){
-
-                                             //genres
-                                             HashMap<String, Object> genres = new HashMap<>();
-
-                                             for(String g : inputGenres){
-                                                genres.put(UUID.randomUUID().toString(), g);
-                                             }
-
-                                             eachSong.put("genre", genres);
-
-                                             db.getReference().child("allUsers").updateChildren(allUsers).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                   if (task.isSuccessful()) {
-                                                      Toast.makeText(getActivity(), "Successfully Updated genres", Toast.LENGTH_SHORT).show();
-                                                      Log.e("genre", "succc");
-                                                   } else {
-                                                      Toast.makeText(getActivity(), "failed to update Genres", Toast.LENGTH_SHORT).show();
-                                                      Log.e("--", task.getException().getMessage());
-                                                   }
-                                                }
-                                             });
-
-                                             break;
-                                          }
-
-                                       }
-                                    }
-                                 }
-                              } else {
-                                 Log.e("---", task.getException().toString());
-                              }
-                           }
-                        });
-
-                        break;
-                     }
-
-                  }
-
-               }
-            }
-         });
-      }
-
-
-   }
-
-   Boolean songNameExists(String name){
-      final Boolean[] b = {false};
       db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
          @Override
          public void onComplete(@NonNull Task<DataSnapshot> task) {
@@ -389,34 +276,141 @@ public class UploadFragment extends Fragment {
                HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
                HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
 
+               boolean boo = false;
+
                for (Object value : allUsers.values()) {
                   HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
 
                   HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("songs");
 
                   if (eachUserSongs != null) {
+
+
                      for (Object song : eachUserSongs.values()) {
                         HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
 
-                        if(eachSong.get("songName").equals(name)){
-                           b[0] = true;
+                        if(eachSong.get("songName").equals(s)){
+                           boo = true;
                         }
 
                      }
                   }
                }
+
+               if(boo){
+                  Toast.makeText(getActivity(), "Song name exists already! Please change file name!", Toast.LENGTH_SHORT).show();
+               }
+               else{
+                  db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                     @Override
+                     public void onComplete(@NonNull Task<DataSnapshot> task) {
+                        if(task.isSuccessful()){
+                           DataSnapshot snapshot = task.getResult();
+                           HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
+                           HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
+
+                           Object[] allUsersKeys = allUsers.keySet().toArray();
+
+                           for(Object eachUserKey : allUsersKeys){
+                              HashMap<String, Object> eachUser = (HashMap<String, Object>) allUsers.get(eachUserKey);
+
+                              if(eachUser.get("email").equals(auth.getCurrentUser().getEmail())){
+                                 Song song = new Song(s, 0, LocalDateTime.now(), null);
+
+                                 db.getReference().child("allUsers").child(eachUserKey.toString()).child("songs").push().setValue(song).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                       if(task.isSuccessful()){
+                                          Log.e("---", "Song Added successfully");
+                                       }
+                                       else{
+                                          Log.e("---", "Failed to add song");
+                                       }
+                                    }
+                                 });
+
+                                 db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DataSnapshot> task) {
+                                       if (task.isSuccessful()) {
+                                          DataSnapshot snapshot = task.getResult();
+                                          HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
+                                          HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
+
+                                          for (Object value : allUsers.values()) {
+                                             HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
+
+                                             HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("songs");
+
+                                             if (eachUserSongs != null) {
+                                                for (Object song : eachUserSongs.values()) {
+                                                   HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
+
+                                                   if(eachSong.get("songName").equals(s)){
+
+                                                      //genres
+                                                      HashMap<String, Object> genres = new HashMap<>();
+
+                                                      for(String g : inputGenres){
+                                                         genres.put(UUID.randomUUID().toString(), g);
+                                                      }
+
+                                                      eachSong.put("genre", genres);
+
+                                                      db.getReference().child("allUsers").updateChildren(allUsers).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                         @Override
+                                                         public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+
+                                                               Toast.makeText(getActivity(), "Successfully Updated genres", Toast.LENGTH_SHORT).show();
+                                                               Log.e("genre", "succc");
+                                                            } else {
+                                                               Toast.makeText(getActivity(), "failed to update Genres", Toast.LENGTH_SHORT).show();
+                                                               Log.e("--", task.getException().getMessage());
+                                                            }
+                                                         }
+                                                      });
+
+                                                      break;
+                                                   }
+
+                                                }
+                                             }
+                                          }
+                                       } else {
+                                          Log.e("---", task.getException().toString());
+                                       }
+                                    }
+                                 });
+
+                                 break;
+                              }
+
+                           }
+
+                        }
+                     }
+                  });
+               }
+
             } else {
                Log.e("---", task.getException().toString());
             }
          }
       });
 
+      clearValuesAfterUpload();
 
-
-      return b[0];
    }
 
+   public void clearValuesAfterUpload(){
+      binding.edmCheck.setChecked(false);
+      binding.rockCheck.setChecked(false);
+      binding.rnbCheck.setChecked(false);
 
+      songAudioUri = null;
+      songImageUri = null;
+   }
 }
 
 
