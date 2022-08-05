@@ -21,4 +21,8 @@
     <item
         android:id="@+id/removeFromPlaylist"
         android:title="Remove from playlist" />
+
+    <item
+        android:id="@+id/removeSong"
+        android:title="Remove Song" />
 </menu>

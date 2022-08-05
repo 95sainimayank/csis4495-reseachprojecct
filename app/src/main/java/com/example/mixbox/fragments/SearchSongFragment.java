@@ -111,7 +111,7 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
       binding.searchedSongRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
       allSongListItems = new ArrayList<>();
       FragmentInfo info = new FragmentInfo("search","");
-      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, info,this);
+      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, info,this, false);
       binding.searchedSongRecyclerView.setAdapter(songListAdapter);
 
       //for Player ----------------------------------------START

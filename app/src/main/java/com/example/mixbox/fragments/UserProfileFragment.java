@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.mixbox.R;
 import com.example.mixbox.databinding.FragmentUserProfileBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -47,7 +48,11 @@ public class UserProfileFragment extends Fragment {
       binding.btnMySongs.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
-
+            Bundle bundle = new Bundle();
+            bundle.putString("profile", "profile");
+            SongListFragment fragment = new SongListFragment();
+            fragment.setArguments(bundle);
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
          }
       });
    }
