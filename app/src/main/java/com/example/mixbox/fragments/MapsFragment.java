@@ -1,5 +1,7 @@
 package com.example.mixbox.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
@@ -39,6 +42,7 @@ public class MapsFragment extends Fragment {
    FragmentMapsBinding binding;
    String API_KEY = "WoxMvvr1Q3d6mpyCG3n67BwAD55NNUcZ";
    HashMap<String, MusicEvent> allEvents;
+   HashMap<String, String> titleWithUrl;
 
    private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -54,6 +58,7 @@ public class MapsFragment extends Fragment {
       @Override
       public void onMapReady(GoogleMap googleMap) {
          allEvents = new HashMap<>();
+         titleWithUrl = new HashMap<>();
 
          binding.btnMapSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,8 +101,6 @@ public class MapsFragment extends Fragment {
                               }
                            }
 
-                           googleMap
-                             .setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
 
                            Object[] objects = allEvents.keySet().toArray();
                            LatLng latlang = null;
@@ -123,6 +126,20 @@ public class MapsFragment extends Fragment {
                                          .position(latlang)
                                          .title(e.getName())
                                          .snippet(snippet));
+
+                                       titleWithUrl.put(e.getName(), e.getUrl());
+
+                                       googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                                          @Override
+                                          public void onInfoWindowClick(@NonNull Marker marker) {
+                                             String url = titleWithUrl.get(marker.getTitle());
+
+                                             Intent i = new Intent(Intent.ACTION_VIEW);
+                                             i.setData(Uri.parse(url));
+
+                                             startActivity(i);
+                                          }
+                                       });
                                     }
                                  }
 
@@ -130,6 +147,10 @@ public class MapsFragment extends Fragment {
                                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlang, 11));
                               }
                            }
+                           googleMap
+                             .setInfoWindowAdapter(new CustomInfoWindowAdapter(getActivity()));
+
+
 
                         } else {
                            Toast.makeText(getActivity(), "fail", Toast.LENGTH_SHORT).show();
