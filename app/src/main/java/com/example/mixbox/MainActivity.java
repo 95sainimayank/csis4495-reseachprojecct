@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,11 +26,13 @@ import com.example.mixbox.fragments.SongListFragment;
 import com.example.mixbox.fragments.UploadFragment;
 import com.example.mixbox.fragments.UserProfileFragment;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
    private DrawerLayout drawer;
    private NavigationView navView;
    private boolean isBackPressedOnce = false;
+   FirebaseAuth auth;
 
    public static final String SHARED_PREFS = "sharedPrefs";
 
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
 
+      auth = FirebaseAuth.getInstance();
       Toolbar toolbar = findViewById(R.id.toolbar);
       setSupportActionBar(toolbar);
 
@@ -47,6 +51,10 @@ public class MainActivity extends AppCompatActivity {
       ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
       drawer.addDrawerListener(toggle);
       toggle.syncState();
+
+      View headerView = navView.getHeaderView(0);
+      TextView currentUser = (TextView) headerView.findViewById(R.id.currentUser);
+      currentUser.setText(auth.getCurrentUser().getEmail());
 
       navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
          @Override
