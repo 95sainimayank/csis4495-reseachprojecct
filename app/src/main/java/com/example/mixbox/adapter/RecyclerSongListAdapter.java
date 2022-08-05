@@ -59,14 +59,16 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
    OnSongClickListener listener;
    FirebaseStorage storage;
    StorageReference storageRef;
+   boolean isProfile;
 
    //HashSet<String> typeSet = new HashSet<>(Arrays.asList("rock", "edm", "rnb", "latest", "mostPlayed", "favorite"));
 
-   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, FragmentInfo info, OnSongClickListener listener){
+   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, FragmentInfo info, OnSongClickListener listener, boolean pro){
         this.context = context;
         this.songList = songList;
         this.listener = listener;
         this.fInfo = info;
+        isProfile = pro;
 
     }
 
@@ -137,7 +139,10 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
             PopupMenu popup = new PopupMenu(context, holder.menuOptions);
             popup.inflate(R.menu.options_menu);
 
-
+            if(!isProfile){
+               MenuItem item = popup.getMenu().findItem(R.id.removeSong);
+               item.setVisible(false);
+            }
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                @Override

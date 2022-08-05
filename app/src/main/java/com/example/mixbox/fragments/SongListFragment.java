@@ -59,6 +59,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -124,7 +125,12 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
       FragmentInfo info = new FragmentInfo(type, getArguments().get("playlistName") == null ? "":getArguments().get("playlistName").toString());
 
-      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, info, this);
+      if(getArguments().get("profile") == null){
+         songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, info, this, false);
+      }
+      else{
+         songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, info, this, true);
+      }
 
       binding.songlistRecyclerView.setAdapter(songListAdapter);
 
@@ -136,9 +142,13 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                player.stop();
             }
 
-            if (getArguments().get("playlistName") == null) {
+            if (getArguments().get("playlistName") == null && getArguments().get("profile") == null) {
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
-            } else {
+            }
+            else if (getArguments().get("profile") != null){
+               getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UserProfileFragment()).commit();
+            }
+              else {
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new PlaylistFragment()).commit();
             }
          }
@@ -147,6 +157,10 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       if (getArguments().get("playlistName") != null) {
          getAllSongs("playlist");
          showPlaylistSongs(getArguments().get("playlistName").toString());
+      }
+
+      if(getArguments().get("profile") != null){
+         getSongsOfCurrentUser();
       }
 
       switch (type) {
@@ -176,6 +190,78 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
 
       return binding.getRoot();
+   }
+
+   private void getSongsOfCurrentUser() {
+      db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+         @Override
+         public void onComplete(@NonNull Task<DataSnapshot> task) {
+            if (task.isSuccessful()) {
+               DataSnapshot snapshot = task.getResult();
+               HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
+               HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
+
+               for (Object value : allUsers.values()) {
+                  HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
+
+                  if (eachUser.get("email").equals(auth.getCurrentUser().getEmail())) {
+                     HashMap<String, Object> currentUserSongs = (HashMap<String, Object>) eachUser.get("songs");
+
+                     if(currentUserSongs == null){
+                        Toast.makeText(getActivity(), "No Songs uploaded!", Toast.LENGTH_SHORT).show();
+                     }
+                     else{
+                        for(Object song : currentUserSongs.values()){
+                           HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
+
+                           SongListModel songListModel = new SongListModel();
+                           songListModel.setArtistName(auth.getCurrentUser().getEmail());
+
+                           String d = "";
+
+                           JSONObject jobj = new JSONObject();
+                           try {
+                              jobj = new JSONObject(eachSong.get("dateTime").toString());
+                           } catch (JSONException e) {
+                              e.printStackTrace();
+                           }
+
+                           try {
+                              int ho = 0;
+                              if(Integer.parseInt(jobj.getString("hour")) > 12){
+                                 ho = Integer.parseInt(jobj.getString("hour")) - 12;
+                              }
+
+                              d = jobj.getString("year") + "-"+
+                                jobj.getString("monthValue") + "-" + jobj.getString("dayOfMonth") + " " + ho + ":" + jobj.getString("minute");
+                           } catch (JSONException e) {
+                              Log.e("hahah", e.getMessage().toString());
+                           }
+
+                           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+
+                           Song s = new Song(
+                                            eachSong.get("songName").toString(),
+                                            Integer.parseInt(eachSong.get("timesPlayed").toString()),
+                                            LocalDateTime.parse(d, formatter),
+                                            null);
+
+                           songListModel.setSong(s);
+
+                           allSongListItems.add(songListModel);
+                        }
+                     }
+
+                     songListAdapter.notifyDataSetChanged();
+                  }
+
+               }
+            } else {
+               Log.e("---", task.getException().toString());
+            }
+         }
+      });
+
    }
 
    private void showPlaylistSongs(String playlistName) {
