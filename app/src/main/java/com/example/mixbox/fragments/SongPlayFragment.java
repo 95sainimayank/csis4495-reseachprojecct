@@ -99,6 +99,8 @@ public class SongPlayFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = FragmentSongPlayBinding.inflate(inflater, container, false);
 
+        Log.d("---","[SongPlayFragment#onCreateView]");
+
         db = FirebaseDatabase.getInstance();
         storage = FirebaseStorage.getInstance();
         // Create a storage reference from our app
@@ -204,6 +206,7 @@ public class SongPlayFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        Log.d("---","[SongPlayFragment#onResume]");
 //        if (isOwner && player == null) {
 //           initializePlayer();
 //        }
@@ -217,16 +220,31 @@ public class SongPlayFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        Assertions.checkNotNull(playerControlView).setPlayer(null);
+        Log.d("---","[SongPlayFragment#onPause]");
+        //Assertions.checkNotNull(playerControlView).setPlayer(null);
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d("---","[SongPlayFragment#onStart]");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d("---","[SongPlayFragment#onStop]");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        Log.d("---","[SongPlayFragment#onDestroy]");
         //if (isOwner && isFinishing()) {
 
             if (player != null) {
+                player.stop();
                 player.release();
                 player = null;
             }

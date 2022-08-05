@@ -200,7 +200,29 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
    @Override
    public void onStop() {
       super.onStop();
+
       ((AppCompatActivity) getActivity()).getSupportActionBar().show();
+   }
+
+   @Override
+   public void onPause() {
+      super.onPause();
+   }
+
+   @Override
+   public void onStart() {
+      super.onStart();
+   }
+
+   @Override
+   public void onDestroy() {
+      super.onDestroy();
+
+      if (player != null) {
+         player.stop();
+         player.release();
+         player = null;
+      }
    }
 
    @Override
@@ -327,6 +349,8 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
       player.play();
       player.setRepeatMode(Player.REPEAT_MODE_ALL);
    }
+
+
 }
 
 
