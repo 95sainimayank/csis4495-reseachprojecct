@@ -43,13 +43,6 @@ public class PlaylistFragment extends Fragment {
    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       binding = FragmentPlaylistBinding.inflate(inflater, container, false);
 
-      binding.playlistTool.setNavigationOnClickListener(new View.OnClickListener() {
-         @Override
-         public void onClick(View view) {
-            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
-         }
-      });
-
       db = FirebaseDatabase.getInstance();
       auth = FirebaseAuth.getInstance();
       allPlaylists = new ArrayList<>();
@@ -104,14 +97,6 @@ public class PlaylistFragment extends Fragment {
                            String playlistName = playlist.get("name").toString();
                            allPlaylists.add(playlistName);
 
-                           //for all songs
-//                        HashMap<String, Object> songs = (HashMap<String, Object>) playlist.get("songs");
-//
-//                        if (songs != null) {
-//                           for(Object eachSong : songs.values()){
-//                              Log.e("jaja song", eachSong.toString());
-//                           }
-//                        }
                         }
                      }
 

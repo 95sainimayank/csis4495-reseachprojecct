@@ -1,6 +1,7 @@
 package com.example.mixbox.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -36,6 +37,15 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
          tvSnippet.setText(snippet);
       }
 
+      mWindow.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View view) {
+
+            Log.e("marker", view.getId() + "");
+            Log.e("marker", "ddd");
+         }
+      });
+
    }
 
    @Nullable
@@ -51,6 +61,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
       renderWindowText(marker, mWindow);
       return mWindow;
    }
+
+
 }
 
 
