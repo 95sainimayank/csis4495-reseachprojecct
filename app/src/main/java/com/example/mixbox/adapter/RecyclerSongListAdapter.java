@@ -137,6 +137,8 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
             PopupMenu popup = new PopupMenu(context, holder.menuOptions);
             popup.inflate(R.menu.options_menu);
 
+
+
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                @Override
                public boolean onMenuItemClick(MenuItem item) {

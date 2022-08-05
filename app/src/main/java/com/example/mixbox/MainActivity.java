@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import com.example.mixbox.fragments.PlaylistFragment;
 import com.example.mixbox.fragments.SearchSongFragment;
 import com.example.mixbox.fragments.SongListFragment;
 import com.example.mixbox.fragments.UploadFragment;
+import com.example.mixbox.fragments.UserProfileFragment;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
       drawer.addDrawerListener(toggle);
       toggle.syncState();
 
+
       navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
          @Override
          public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -64,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
                case R.id.nav_upload:
-//                  getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UploadSongFragment()).commit();
                   getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UploadFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
                   return true;
@@ -120,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
    }
 
 
+   public void navHeaderClick(View view) {
+      getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new UserProfileFragment()).commit();
+      drawer.closeDrawer(Gravity.LEFT);
+   }
 }
 
 
