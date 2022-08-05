@@ -284,15 +284,12 @@ public class UploadFragment extends Fragment {
                   HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("songs");
 
                   if (eachUserSongs != null) {
-
-
                      for (Object song : eachUserSongs.values()) {
                         HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
 
                         if(eachSong.get("songName").equals(s)){
                            boo = true;
                         }
-
                      }
                   }
                }

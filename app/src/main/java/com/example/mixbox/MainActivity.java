@@ -1,8 +1,12 @@
 package com.example.mixbox;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -11,19 +15,20 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.example.mixbox.fragments.EventFragment;
 import com.example.mixbox.fragments.HomeFragment;
 import com.example.mixbox.fragments.MapsFragment;
 import com.example.mixbox.fragments.PlaylistFragment;
 import com.example.mixbox.fragments.SearchSongFragment;
 import com.example.mixbox.fragments.SongListFragment;
 import com.example.mixbox.fragments.UploadFragment;
-import com.example.mixbox.fragments.UploadSongFragment;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
    private DrawerLayout drawer;
    private NavigationView navView;
+   private boolean isBackPressedOnce = false;
+
+   public static final String SHARED_PREFS = "sharedPrefs";
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +79,15 @@ public class MainActivity extends AppCompatActivity {
                case R.id.nav_playlist:
                   getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new PlaylistFragment()).commit();
                   drawer.closeDrawer(Gravity.LEFT);
+                  return true;
+               case R.id.nav_logout:
+                  clearLoginData();
+                  Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                  startActivity(intent);
+                  finish();
                default:
                   return false;
             }
-
 
          }
       });
@@ -89,11 +99,26 @@ public class MainActivity extends AppCompatActivity {
    public void onBackPressed() {
       if (drawer.isDrawerOpen(GravityCompat.START)) {
          drawer.closeDrawer(GravityCompat.START);
-      } else {
-         super.onBackPressed();
-
       }
+      else if(!isBackPressedOnce){
+         Toast.makeText(MainActivity.this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+         isBackPressedOnce = true;
+      }
+      else{
+         super.onBackPressed();
+         return;
+      }
+
    }
+   private void clearLoginData() {
+      SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+
+      SharedPreferences.Editor editor = sharedPreferences.edit();
+      editor.clear();
+      editor.apply();
+   }
+
+
 }
 
 
