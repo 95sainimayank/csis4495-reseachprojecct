@@ -98,6 +98,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       binding = FragmentSongListBinding.inflate(inflater, container, false);
 
       Log.d("---", "onCreateView in SongListFragment.");
+      Log.d("---","[SongListFragment#onCreateView]");
       db = FirebaseDatabase.getInstance();
       auth = FirebaseAuth.getInstance();
 
@@ -232,15 +233,41 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    }
 
    @Override
+   public void onPause() {
+      super.onPause();
+      Log.d("---","[SongListFragment#onPause]");
+   }
+
+   @Override
    public void onResume() {
       super.onResume();
+      Log.d("---","[SongListFragment#onResume]");
       ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
    }
 
    @Override
    public void onStop() {
       super.onStop();
+      Log.d("---","[SongListFragment#onStop]");
       ((AppCompatActivity) getActivity()).getSupportActionBar().show();
+   }
+
+   @Override
+   public void onStart() {
+      super.onStart();
+      Log.d("---","[SongListFragment#onStart]");
+   }
+
+   @Override
+   public void onDestroy() {
+      super.onDestroy();
+
+      Log.d("---","[SongListFragment#onDetroy]");
+      if (player != null) {
+         player.stop();
+         player.release();
+         player = null;
+      }
    }
 
    public void getAllSongs(String val) {
@@ -265,6 +292,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
                         String name = eachUser.get("fullName").toString();
                         recyclerViewModelObject.setArtistName(name);
+
 
                         String d = "";
 
@@ -362,6 +390,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                               recyclerViewModelObject.
                                 setSong(new Song(eachSong.get("songName").toString(),
                                   Integer.parseInt(eachSong.get("timesPlayed").toString()),
+
                                   LocalDateTime.parse(d, formatter),
                                   null));
 
