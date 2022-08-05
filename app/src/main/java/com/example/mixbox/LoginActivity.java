@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -56,6 +57,8 @@ public class LoginActivity extends AppCompatActivity {
          }
       });
 
+      enableNightModeIfApplicable();
+
       btnLogin.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
@@ -95,6 +98,18 @@ public class LoginActivity extends AppCompatActivity {
       });
 
 
+   }
+
+   private void enableNightModeIfApplicable() {
+      SharedPreferences sharedPreferences = this.getSharedPreferences("nightmode", MODE_PRIVATE);
+      int choice = sharedPreferences.getInt("choice", AppCompatDelegate.MODE_NIGHT_NO);
+
+      if(choice == AppCompatDelegate.MODE_NIGHT_NO){
+         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+      }
+      else {
+         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+      }
    }
 
    private void clearLoginData() {

@@ -1,11 +1,14 @@
 package com.example.mixbox.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.example.mixbox.R;
@@ -22,6 +25,8 @@ public class UserProfileFragment extends Fragment {
    FragmentUserProfileBinding binding;
    FirebaseAuth auth;
    FirebaseDatabase db;
+   String SHARED_PREF = "nightmode";
+   SharedPreferences sharedPreferences;
 
    public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -37,7 +42,15 @@ public class UserProfileFragment extends Fragment {
       addEventListeners();
       getAllUserData();
 
+      sharedPreferences = getActivity().getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
+      int choice = sharedPreferences.getInt("choice", AppCompatDelegate.MODE_NIGHT_NO);
 
+      if(choice == AppCompatDelegate.MODE_NIGHT_NO){
+         binding.darkModeSwitch.setChecked(false);
+      }
+      else {
+         binding.darkModeSwitch.setChecked(true);
+      }
 
 
       return binding.getRoot();
@@ -55,6 +68,26 @@ public class UserProfileFragment extends Fragment {
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
          }
       });
+
+      binding.darkModeSwitch.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View view) {
+            sharedPreferences = getActivity().getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            if(binding.darkModeSwitch.isChecked()){
+               AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            }
+            else{
+               AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+
+            editor.putInt("choice", AppCompatDelegate.getDefaultNightMode());
+            editor.apply();
+
+         }
+      });
+
    }
 
    private void getAllUserData() {
