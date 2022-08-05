@@ -1,31 +1,24 @@
 package com.example.mixbox;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.mixbox.model.AllUserData;
-import com.example.mixbox.model.Playlist;
-import com.example.mixbox.model.Song;
-import com.example.mixbox.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
    FirebaseAuth auth;
@@ -33,6 +26,12 @@ public class LoginActivity extends AppCompatActivity {
    EditText emailEditText;
    EditText pwdEditText;
    TextView toSignupTxtView;
+   Switch saveLoginInfo;
+
+   public static final String SHARED_PREFS = "sharedPrefs";
+   public static final String USERNAME = "user";
+   public static final String PASSWORD = "pass";
+   public static final String SWITCH = "switch1";
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +42,10 @@ public class LoginActivity extends AppCompatActivity {
       emailEditText = findViewById(R.id.loginEmailEditText);
       pwdEditText = findViewById(R.id.loginPwdEditText);
       toSignupTxtView = findViewById(R.id.txtSignup);
+      saveLoginInfo = findViewById(R.id.saveSwitch);
 
+      loadLoginData();
+      
       auth = FirebaseAuth.getInstance();
 
       toSignupTxtView.setOnClickListener(new View.OnClickListener() {
@@ -71,8 +73,16 @@ public class LoginActivity extends AppCompatActivity {
                      if (task.isSuccessful()) {
                         Toast.makeText(LoginActivity.this, "Login Successful !!", Toast.LENGTH_SHORT).show();
 
+                        if(saveLoginInfo.isChecked()){
+                           saveData(email, pwd);
+                        }
+                        else{
+                           clearLoginData();
+                        }
+
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
+                        finish();
                      } else {
                         Toast.makeText(LoginActivity.this, "Login failed! Please check your internet connection or your credentials.", Toast.LENGTH_SHORT).show();
                      }
@@ -85,6 +95,37 @@ public class LoginActivity extends AppCompatActivity {
       });
 
 
+   }
+
+   private void clearLoginData() {
+      SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+
+      SharedPreferences.Editor editor = sharedPreferences.edit();
+      editor.clear();
+      editor.apply();
+   }
+
+   private void loadLoginData() {
+      SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+
+      Log.e("Inside load login data", sharedPreferences.getString(USERNAME, "") + "-" + sharedPreferences.getString(PASSWORD, "") + sharedPreferences.getBoolean(SHARED_PREFS, false));
+
+      emailEditText.setText(sharedPreferences.getString(USERNAME, ""));
+      pwdEditText.setText(sharedPreferences.getString(PASSWORD, ""));
+      saveLoginInfo.setChecked(sharedPreferences.getBoolean(SHARED_PREFS, false));
+   }
+
+   private void saveData(String email, String pass) {
+      SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+      SharedPreferences.Editor editor = sharedPreferences.edit();
+
+      editor.putString(USERNAME, email);
+      editor.putString(PASSWORD, pass);
+      editor.putBoolean(SWITCH, saveLoginInfo.isChecked());
+
+      Log.e("Inside save login data", sharedPreferences.getString(USERNAME, "") + "-" + sharedPreferences.getString(PASSWORD, "") + sharedPreferences.getBoolean(SHARED_PREFS, false));
+
+      editor.apply();
    }
 
 
