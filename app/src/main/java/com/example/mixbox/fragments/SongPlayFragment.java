@@ -54,6 +54,7 @@ public class SongPlayFragment extends Fragment {
     FirebaseDatabase db;
     FirebaseStorage storage;
     String type;
+    String playlistName;
     private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
     private static final String EXTENSION_EXTRA = "extension";
     private static final String DRM_SCHEME_EXTRA = "drm_scheme";
@@ -87,19 +88,6 @@ public class SongPlayFragment extends Fragment {
         // Required empty public constructor
     }
 
-    // TODO: Rename and change types and number of parameters
-    /*
-    public static SongPlayFragment newInstance(String param1, String param2) {
-        SongPlayFragment fragment = new SongPlayFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-    */
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,9 +104,13 @@ public class SongPlayFragment extends Fragment {
         // Create a storage reference from our app
         StorageReference storageRef = storage.getReference();
 
-        type = "";
-        if(getArguments().get("type") != null)
+        if(getArguments().get("type") != null) {
             type = getArguments().get("type").toString();
+        }
+
+        if(getArguments().get("playlistName") != null){ // playlistName is not null
+            playlistName = getArguments().get("playlistName").toString();
+        }
 
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,11 +120,26 @@ public class SongPlayFragment extends Fragment {
                     player.stop();
                 }
                 //getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new SongListFragment()).commit();
-                Bundle bundle = new Bundle();
-                bundle.putString("type", type);
-                SongListFragment fragment = new SongListFragment();
-                fragment.setArguments(bundle);
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+
+                if(type == "search"){
+                    //Bundle bundle = new Bundle();
+                    SearchSongFragment fragment = new SearchSongFragment();
+                    //fragment.setArguments(bundle);
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+                }else{
+                    Bundle bundle = new Bundle();
+                    if(type != null && type != ""){
+                        bundle.putString("type", type);
+                    }
+                    if(playlistName != null && playlistName != ""){
+                        bundle.putString("playlistName", playlistName);
+                    }
+
+                    SongListFragment fragment = new SongListFragment();
+                    fragment.setArguments(bundle);
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+                }
+
             }
         });
 

@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.mixbox.R;
 import com.example.mixbox.adapter.RecyclerSongListAdapter;
 import com.example.mixbox.databinding.FragmentSongListBinding;
+import com.example.mixbox.model.FragmentInfo;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
 import com.example.mixbox.utilities.SortSongByLatest;
@@ -120,19 +121,22 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
       Log.d("---", " [SongListFragment] Song List Type = " + type);
       binding.songlistRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, type, this);
+
+      FragmentInfo info = new FragmentInfo(type, getArguments().get("playlistName") == null ? "":getArguments().get("playlistName").toString());
+
+      songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, info, this);
 
       binding.songlistRecyclerView.setAdapter(songListAdapter);
 
       binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
-            if (getArguments().get("playlistName") == null) {
-               Log.d("---", "Back to HomeFragment");
-               if (player != null) {
-                  player.stop();
-               }
+            Log.d("---", "Back to HomeFragment");
+            if (player != null) {
+               player.stop();
+            }
 
+            if (getArguments().get("playlistName") == null) {
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
             } else {
                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new PlaylistFragment()).commit();

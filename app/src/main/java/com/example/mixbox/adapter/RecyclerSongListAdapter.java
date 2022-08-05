@@ -26,8 +26,10 @@ import androidx.cardview.widget.CardView;
 
 import com.example.mixbox.fragments.OnSongClickListener;
 
+import com.example.mixbox.fragments.SearchSongFragment;
 import com.example.mixbox.fragments.SongListFragment;
 import com.example.mixbox.fragments.SongPlayFragment;
+import com.example.mixbox.model.FragmentInfo;
 import com.example.mixbox.model.SongListModel;
 import com.example.mixbox.utilities.PlaylistDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,40 +43,31 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongListAdapter.ViewHolder> {
    private Context context;
-   String type;
+   //String type;
+   //String playlistName;
+   FragmentInfo fInfo;
    ArrayList<SongListModel> songList;
    FirebaseDatabase db;
    String currentUserEmail;
    OnSongClickListener listener;
    FirebaseStorage storage;
    StorageReference storageRef;
-   /*
-   FirebaseStorage storage;
-   StorageReference storageRef;
-   @Nullable
-   private static ExoPlayer player;
-   private boolean isOwner;
-   @Nullable
-   private PlayerControlView playerControlView;
 
-   private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
-   private static final String EXTENSION_EXTRA = "extension";
-   private static final String DRM_SCHEME_EXTRA = "drm_scheme";
-   private static final String DRM_LICENSE_URL_EXTRA = "drm_license_url";
-   private static final String OWNER_EXTRA = "owner";
-   private static String DEFAULT_MEDIA_URI = "";
-   */
+   //HashSet<String> typeSet = new HashSet<>(Arrays.asList("rock", "edm", "rnb", "latest", "mostPlayed", "favorite"));
 
-   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, String type, OnSongClickListener listener){
+   public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, FragmentInfo info, OnSongClickListener listener){
         this.context = context;
         this.songList = songList;
         this.listener = listener;
-        this.type = type;
+        this.fInfo = info;
+
     }
 
    @NonNull
@@ -152,8 +145,18 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         //handle menu1 click
                         listener.onPlayerStop();
                         Bundle bundle = new Bundle();
-                        bundle.putString("type", type);
-                        Log.d("---", " [RecyclerSongListAdapter] Song List Type = " + type);
+                        if(fInfo.getType() != ""){
+                           bundle.putString("type", fInfo.getType());
+                           if(fInfo.getType() == "search") {
+                              //bundle.putString("searchKeyword", fInfo.getSearchKeyword());
+                           }
+                           Log.d("---", " [RecyclerSongListAdapter] Song List Type = " + fInfo.getType());
+                        }
+                        if(fInfo.getPlaylistName() != ""){
+                           bundle.putString("playlistName",fInfo.getPlaylistName());
+                           Log.d("---", " [RecyclerSongListAdapter] Song List playlistName = " + fInfo.getPlaylistName());
+                        }
+
                         bundle.putString("title", songItem.getSong().getSongName());
                         bundle.putString("artist", songItem.getArtistName());
                         String albumCoverName = songItem.getSong().getSongName().split("\\.")[0] + ".png";
@@ -161,6 +164,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         SongPlayFragment fragment = new SongPlayFragment();
                         fragment.setArguments(bundle);
                         ((FragmentActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+
                         break;
                      case R.id.addFav:
                         addToFavorite(songItem.getSong().getSongName());
