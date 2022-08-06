@@ -32,23 +32,6 @@ public class EventFragment extends Fragment {
    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
       binding = FragmentEventBinding.inflate(inflater, container, false);
 
-//      RetroConnection connection = new RetroConnection();
-//      Retrofit retrofit = connection.retrofit;
-//
-//      AppService appService = retrofit.create(AppService.class);
-//
-//      appService.getAll(city).enqueue(new Callback<OuterClass>() {
-//         @Override
-//         public void onResponse(Call<OuterClass> call, Response<OuterClass> response) {
-////            Log.e("--succ", response.body().get_embedded().getEvents().get(1).get_embedded().getVenues().get(0).getLocation().getLongitude() + "");
-//            Log.e("succ", response.body().get_embedded().getEvents().size() + "");
-//         }
-//         @Override
-//         public void onFailure(Call<OuterClass> call, Throwable t) {
-//            Log.e("--faile", t.getMessage());
-//         }
-//      });
-
       return binding.getRoot();
    }
 }

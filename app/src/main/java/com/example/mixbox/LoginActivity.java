@@ -127,7 +127,7 @@ public class LoginActivity extends AppCompatActivity {
 
       emailEditText.setText(sharedPreferences.getString(USERNAME, ""));
       pwdEditText.setText(sharedPreferences.getString(PASSWORD, ""));
-      saveLoginInfo.setChecked(sharedPreferences.getBoolean(SHARED_PREFS, false));
+      saveLoginInfo.setChecked(sharedPreferences.getBoolean(SWITCH, false));
    }
 
    private void saveData(String email, String pass) {

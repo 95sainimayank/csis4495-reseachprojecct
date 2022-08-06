@@ -159,7 +159,7 @@ public class PlaylistFragment extends Fragment {
                            @Override
                            public void onComplete(@NonNull Task<Void> task) {
                               if (task.isSuccessful()) {
-                                 Toast.makeText(getActivity(), "Successfully added to playlist! " + playlistName, Toast.LENGTH_SHORT).show();
+                                 Toast.makeText(getActivity(), "Successfully added playlist: " + playlistName, Toast.LENGTH_SHORT).show();
                               } else {
                                  Toast.makeText(getActivity(), "Failed to add to playlist " + playlistName + "! Try again later!", Toast.LENGTH_SHORT).show();
                                  Log.e("--", task.getException().getMessage());
