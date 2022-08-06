@@ -190,7 +190,7 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
                               Log.e("hahah", e.getMessage().toString());
                            }
 
-                           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+                           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
 
                            recyclerViewModelObject.
