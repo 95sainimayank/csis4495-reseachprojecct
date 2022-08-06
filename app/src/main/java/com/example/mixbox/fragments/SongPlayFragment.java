@@ -143,7 +143,6 @@ public class SongPlayFragment extends Fragment {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             createChannel();
             getActivity().registerReceiver(broadcastReceiver, new IntentFilter("TRACKS_TRACKS"));
-            //startService(new Intent(getBaseContext(), OnClearFromRecentService.class));
         }
 
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -432,7 +431,7 @@ public class SongPlayFragment extends Fragment {
         }
     };
 
-    public void onTrackPlay() {
+    private void onTrackPlay() {
 
         currentAlbumBitmap =((BitmapDrawable)albumCover.getDrawable()).getBitmap();
         CreateNotification.createNotification(getActivity(), sTitle, artist, currentAlbumBitmap,
@@ -442,7 +441,7 @@ public class SongPlayFragment extends Fragment {
         }
     }
 
-    public void onTrackPause() {
+    private void onTrackPause() {
         currentAlbumBitmap =((BitmapDrawable)albumCover.getDrawable()).getBitmap();
         CreateNotification.createNotification(getActivity(), sTitle, artist, currentAlbumBitmap,
                 R.drawable.ic_play_arrow_24);
