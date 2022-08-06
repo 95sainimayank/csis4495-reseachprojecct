@@ -47,6 +47,7 @@ public class UploadFragment extends Fragment {
    StorageReference storage;
    FirebaseDatabase db;
    FirebaseAuth auth;
+   boolean boo;
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
@@ -94,10 +95,10 @@ public class UploadFragment extends Fragment {
             if(binding.rnbCheck.isChecked()) songCategories.add("rnb");
             if(binding.rockCheck.isChecked()) songCategories.add("rock");
             if(binding.edmCheck.isChecked()) songCategories.add("edm");
-            String[] songNameSplit = songAudioUri.getLastPathSegment().split("/");
+
 
            // String[] audioNameSplit = songNameSplit[songNameSplit.length - 1].split("\\.");
-            updateInDb(songNameSplit[songNameSplit.length - 1], songCategories);
+
 
             if(songAudioUri == null)
                Toast.makeText(getActivity(), "Please choose a audio file!", Toast.LENGTH_SHORT).show();
@@ -106,45 +107,18 @@ public class UploadFragment extends Fragment {
             else if (!binding.edmCheck.isChecked() && !binding.rnbCheck.isChecked()  && !binding.rockCheck.isChecked())
                Toast.makeText(getActivity(), "Please select at least one category!", Toast.LENGTH_SHORT).show();
             else{
+
+               Log.e("debug", (songAudioUri == null)+ "\t" + (songImageUri == null) );
                disableViews();
+               String[] songNameSplit = songAudioUri.getLastPathSegment().split("/");
+               updateInDb(songNameSplit[songNameSplit.length - 1], songCategories);
 
                storage = FirebaseStorage.getInstance().getReference();
 //               String[] songNameSplit = songAudioUri.getLastPathSegment().split("/");
-               Toast.makeText(getActivity(), "Audio file upload started.", Toast.LENGTH_SHORT).show();
+               if(!boo)
+                  Toast.makeText(getActivity(), "Audio file upload started.", Toast.LENGTH_SHORT).show();
 
-               storage.child("music").child(songNameSplit[songNameSplit.length - 1]).putFile(songAudioUri)
-                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                  @Override
-                  public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                     Toast.makeText(getActivity(), "Audio uploaded successfully!", Toast.LENGTH_SHORT).show();
-                     binding.progressB.setVisibility(View.INVISIBLE);
-
-                     String[] audioNameSplit = songNameSplit[songNameSplit.length - 1].split("\\.");
-                     String audioName = audioNameSplit[0];
-                     String[] imageNameSplit = getFileName(songImageUri).split("\\.");
-                     String imageName = audioName + "." + imageNameSplit[imageNameSplit.length - 1];
-
-                     ArrayList<String> songCategories = new ArrayList<>();
-                     if(binding.rnbCheck.isChecked()) songCategories.add("rnb");
-                     if(binding.rockCheck.isChecked()) songCategories.add("rock");
-                     if(binding.edmCheck.isChecked()) songCategories.add("edm");
-
-                     uploadImage(imageName);
-
-                  }
-               }).addOnFailureListener(new OnFailureListener() {
-                  @Override
-                  public void onFailure(@NonNull Exception e) {
-                     Log.e("Audio upload failed", e.getMessage());
-                     Toast.makeText(getActivity(), "Failed to upload file. Please try again later!", Toast.LENGTH_SHORT).show();
-                     enableViews();
-                  }
-               }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                  @Override
-                  public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                     binding.progressB.setVisibility(View.VISIBLE);
-                  }
-               });
+              uploadAudio(songNameSplit[songNameSplit.length - 1]);
 
 
             }
@@ -154,16 +128,58 @@ public class UploadFragment extends Fragment {
       return binding.getRoot();
    }
 
+   private void uploadAudio(String s) {
+
+      storage.child("music").child(s).putFile(songAudioUri)
+        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+           @Override
+           public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+              if(!boo)
+                 Toast.makeText(getActivity(), "Audio uploaded successfully!", Toast.LENGTH_SHORT).show();
+              binding.progressB.setVisibility(View.INVISIBLE);
+
+              String[] audioNameSplit = s.split("\\.");
+              String audioName = audioNameSplit[0];
+
+              ArrayList<String> songCategories = new ArrayList<>();
+              if(binding.rnbCheck.isChecked()) songCategories.add("rnb");
+              if(binding.rockCheck.isChecked()) songCategories.add("rock");
+              if(binding.edmCheck.isChecked()) songCategories.add("edm");
+
+              String[] imageNameSplit = getFileName(songImageUri).split("\\.");
+              String imageName = audioName + "." + imageNameSplit[imageNameSplit.length - 1];
+
+              uploadImage(imageName);
+           }
+        }).addOnFailureListener(new OnFailureListener() {
+           @Override
+           public void onFailure(@NonNull Exception e) {
+              Log.e("Audio upload failed", e.getMessage());
+              Toast.makeText(getActivity(), "Failed to upload file. Please try again later!", Toast.LENGTH_SHORT).show();
+              enableViews();
+           }
+        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+           @Override
+           public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+              binding.progressB.setVisibility(View.VISIBLE);
+           }
+        });
+
+   }
 
    private void uploadImage(String imageName) {
-      Toast.makeText(getActivity(), "Image upload started", Toast.LENGTH_SHORT).show();
+      if(!boo)
+         Toast.makeText(getActivity(), "Image upload started", Toast.LENGTH_SHORT).show();
 
       storage.child("albumcover").child(imageName).putFile(songImageUri)
         .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
            @Override
            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
               binding.progressB.setVisibility(View.INVISIBLE);
-              Toast.makeText(getActivity(), "Upload successfully completed", Toast.LENGTH_SHORT).show();
+
+              if(!boo){
+                 Toast.makeText(getActivity(), "Upload successfully completed", Toast.LENGTH_SHORT).show();
+              }
 
               enableViews();
            }
@@ -196,10 +212,17 @@ public class UploadFragment extends Fragment {
               Uri uri = data.getData();
               String fileType = getMimeType(uri);
 
-              if(fileType.equals("audio"))
+              String fileName = getFileName(uri);
+
+              if(fileType.equals("audio")){
                  songAudioUri = uri;
-              else if(fileType.equals("image"))
+                 binding.songFileName.setText(fileName);
+              }
+              else if(fileType.equals("image")){
                  songImageUri = uri;
+                 binding.imageFileName.setText(fileName);
+
+              }
               else
                  Toast.makeText(getActivity(), "Choose correct file!", Toast.LENGTH_SHORT).show();
            }
@@ -276,7 +299,7 @@ public class UploadFragment extends Fragment {
                HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
                HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
 
-               boolean boo = false;
+               boo = false;
 
                for (Object value : allUsers.values()) {
                   HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
@@ -361,6 +384,7 @@ public class UploadFragment extends Fragment {
 
                                                                Toast.makeText(getActivity(), "Successfully Updated genres", Toast.LENGTH_SHORT).show();
                                                                Log.e("genre", "succc");
+                                                               //clearValuesAfterUpload();
                                                             } else {
                                                                Toast.makeText(getActivity(), "failed to update Genres", Toast.LENGTH_SHORT).show();
                                                                Log.e("--", task.getException().getMessage());
@@ -396,18 +420,8 @@ public class UploadFragment extends Fragment {
          }
       });
 
-      clearValuesAfterUpload();
-
    }
 
-   public void clearValuesAfterUpload(){
-      binding.edmCheck.setChecked(false);
-      binding.rockCheck.setChecked(false);
-      binding.rnbCheck.setChecked(false);
-
-      songAudioUri = null;
-      songImageUri = null;
-   }
 }
 
 

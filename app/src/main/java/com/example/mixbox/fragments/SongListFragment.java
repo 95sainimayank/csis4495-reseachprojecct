@@ -258,7 +258,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                               Log.e("hahah", e.getMessage().toString());
                            }
 
-                           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+                           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
                            Song s = new Song(
                                             eachSong.get("songName").toString(),
@@ -442,7 +442,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                            Log.e("hahah", e.getMessage().toString());
                         }
 
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
                         recyclerViewModelObject.
                           setSong(new Song(eachSong.get("songName").toString(),
@@ -512,7 +512,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                                  Log.e("hahah", e.getMessage().toString());
                               }
 
-                              DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+                              DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
                               recyclerViewModelObject.
                                 setSong(new Song(eachSong.get("songName").toString(),
@@ -587,7 +587,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                            Log.e("hahah", e.getMessage().toString());
                         }
 
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
                         recyclerViewModelObject.
                           setSong(new Song(eachSong.get("songName").toString(),
@@ -661,7 +661,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                            Log.e("hahah", e.getMessage().toString());
                         }
 
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
                         recyclerViewModelObject.
                           setSong(new Song(eachSong.get("songName").toString(),
