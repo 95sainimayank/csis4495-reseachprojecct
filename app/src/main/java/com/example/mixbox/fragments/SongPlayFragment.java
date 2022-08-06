@@ -69,6 +69,7 @@ public class SongPlayFragment extends Fragment {
     FirebaseStorage storage;
     String type;
     String playlistName;
+    String searchKeyword;
     private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
     private static final String EXTENSION_EXTRA = "extension";
     private static final String DRM_SCHEME_EXTRA = "drm_scheme";
@@ -140,6 +141,10 @@ public class SongPlayFragment extends Fragment {
             playlistName = getArguments().get("playlistName").toString();
         }
 
+        if(getArguments().get("searchKeyword") != null){ // searchKeyword is not null
+            searchKeyword = getArguments().get("searchKeyword").toString();
+        }
+
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             createChannel();
             getActivity().registerReceiver(broadcastReceiver, new IntentFilter("TRACKS_TRACKS"));
@@ -155,9 +160,10 @@ public class SongPlayFragment extends Fragment {
                 //getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new SongListFragment()).commit();
 
                 if(type == "search"){
-                    //Bundle bundle = new Bundle();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("searchKeyword", searchKeyword);
                     SearchSongFragment fragment = new SearchSongFragment();
-                    //fragment.setArguments(bundle);
+                    fragment.setArguments(bundle);
                     getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
                 }else{
                     Bundle bundle = new Bundle();
