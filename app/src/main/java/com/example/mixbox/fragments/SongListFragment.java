@@ -390,6 +390,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
          player.release();
          player = null;
       }
+
       if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
          notificationManager.cancelAll();
       }
