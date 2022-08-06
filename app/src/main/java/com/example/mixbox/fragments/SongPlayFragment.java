@@ -1,13 +1,24 @@
 package com.example.mixbox.fragments;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +31,8 @@ import com.example.mixbox.MainActivity;
 import com.example.mixbox.R;
 import com.example.mixbox.databinding.FragmentSongListBinding;
 import com.example.mixbox.databinding.FragmentSongPlayBinding;
+import com.example.mixbox.model.SongListModel;
+import com.example.mixbox.service.CreateNotification;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
@@ -51,6 +64,7 @@ import java.util.UUID;
 public class SongPlayFragment extends Fragment {
     FragmentSongPlayBinding binding;
 
+    NotificationManager notificationManager;
     FirebaseDatabase db;
     FirebaseStorage storage;
     String type;
@@ -83,6 +97,14 @@ public class SongPlayFragment extends Fragment {
 
     //For test
 
+    //int position = 0;
+    String sTitle = "song title";
+    String artist = "artist name";
+    Bitmap currentAlbumBitmap;
+
+    TextView songTitle;
+    TextView artistName;
+    ImageView albumCover;
 
     public SongPlayFragment() {
         // Required empty public constructor
@@ -99,6 +121,10 @@ public class SongPlayFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = FragmentSongPlayBinding.inflate(inflater, container, false);
 
+        songTitle = binding.sTitle;
+        artistName = binding.sArtist;
+        albumCover = binding.albumImage;
+
         Log.d("---","[SongPlayFragment#onCreateView]");
 
         db = FirebaseDatabase.getInstance();
@@ -112,6 +138,12 @@ public class SongPlayFragment extends Fragment {
 
         if(getArguments().get("playlistName") != null){ // playlistName is not null
             playlistName = getArguments().get("playlistName").toString();
+        }
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            createChannel();
+            getActivity().registerReceiver(broadcastReceiver, new IntentFilter("TRACKS_TRACKS"));
+            //startService(new Intent(getBaseContext(), OnClearFromRecentService.class));
         }
 
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -145,17 +177,13 @@ public class SongPlayFragment extends Fragment {
             }
         });
 
-        TextView songTitle = binding.sTitle;
-        TextView artistName = binding.sArtist;
-        ImageView albumCover = binding.albumImage;
-
         playerControlView = binding.playerControlView;
 
         //isOwner = getIntent().getBooleanExtra(OWNER_EXTRA, /* defaultValue= */ true);
         isOwner = true;
 
-        String sTitle = getArguments().get("title").toString();
-        String artist = getArguments().get("artist").toString();
+        sTitle = getArguments().get("title").toString();
+        artist = getArguments().get("artist").toString();
         songTitle.setText(sTitle);
         songTitle.setSelected(true);
         artistName.setText(artist);
@@ -169,13 +197,33 @@ public class SongPlayFragment extends Fragment {
                 Glide.with(getActivity() ) //context
                         .load(uri)
                         .into(binding.albumImage);
+
+
+                //-------------------------------------------------------------------------
+                /*
+                //Bitmap bitmap = null;
+                ContentResolver contentResolver = getActivity().getContentResolver();
+                try {
+                    if(Build.VERSION.SDK_INT < 28) {
+                        currentAlbumBitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri);
+                    } else {
+                        ImageDecoder.Source source = ImageDecoder.createSource(contentResolver, uri);
+                        currentAlbumBitmap = ImageDecoder.decodeBitmap(source);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                */
+                //--------------------------------------------------------------------------------
             }
+
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.e("---", "Error: " + e);
             }
         });
+
 
         Log.d("---", "Initialize ExoPlayer.");
         initializePlayer();
@@ -197,9 +245,23 @@ public class SongPlayFragment extends Fragment {
             }
         });
 
+
+
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_song_play, container, false);
         return binding.getRoot();
+    }
+
+    private void createChannel() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel(CreateNotification.CHANNEL_ID,
+                    "MIXBOX", NotificationManager.IMPORTANCE_LOW);
+
+            notificationManager = requireContext().getSystemService(NotificationManager.class);
+            if(notificationManager != null){
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
     }
 
     @Override
@@ -229,12 +291,31 @@ public class SongPlayFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d("---","[SongPlayFragment#onStart]");
+
+        if(player != null){
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                notificationManager.cancelAll();
+            }
+        }
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d("---","[SongPlayFragment#onStop]");
+
+
+        if(player != null){
+            if(player.isPlaying()){
+                Log.d("---", "play.setOnClickListener_call onTrackPause");
+                onTrackPlay();
+            }else{
+                Log.d("---", "play.setOnClickListener_call onTrackPlay");
+                onTrackPause();
+            }
+        }
+
     }
 
     @Override
@@ -249,6 +330,11 @@ public class SongPlayFragment extends Fragment {
                 player = null;
             }
        // }
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            notificationManager.cancelAll();
+        }
+        getActivity().unregisterReceiver(broadcastReceiver);
     }
 
     private void initializePlayer(){
@@ -320,6 +406,50 @@ public class SongPlayFragment extends Fragment {
         player.prepare();
         player.play();
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
+    }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getExtras().getString("actionname");
+            switch(action){
+                case CreateNotification.ACTION_PREVIOUS:
+                    //
+                    break;
+                case CreateNotification.ACTION_PLAY:
+                    if(player != null && player.isPlaying()){
+                        Log.d("---", "Broadcastreceiver_call onTrackPause");
+                        onTrackPause();
+                    }else{
+                        Log.d("---", "Broadcastreceiver_call onTrackPlay");
+                        onTrackPlay();
+                    }
+                    break;
+                case CreateNotification.ACTION_NEXT:
+                    //
+                    break;
+            }
+        }
+    };
+
+    public void onTrackPlay() {
+
+        currentAlbumBitmap =((BitmapDrawable)albumCover.getDrawable()).getBitmap();
+        CreateNotification.createNotification(getActivity(), sTitle, artist, currentAlbumBitmap,
+                R.drawable.ic_pause_24);
+        if(player != null & !player.isPlaying()){
+            player.play();
+        }
+    }
+
+    public void onTrackPause() {
+        currentAlbumBitmap =((BitmapDrawable)albumCover.getDrawable()).getBitmap();
+        CreateNotification.createNotification(getActivity(), sTitle, artist, currentAlbumBitmap,
+                R.drawable.ic_play_arrow_24);
+
+        if(player != null && player.isPlaying()){
+            player.pause();
+        }
     }
 
 }
