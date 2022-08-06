@@ -112,7 +112,6 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       binding = FragmentSongListBinding.inflate(inflater, container, false);
 
-      Log.d("---", "onCreateView in SongListFragment.");
       Log.d("---","[SongListFragment#onCreateView]");
       db = FirebaseDatabase.getInstance();
       auth = FirebaseAuth.getInstance();
@@ -272,6 +271,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                         }
                      }
 
+                     Log.d("---", "getSongsOfCurrentUser_Adapter.notifyDataSetChanged");
                      songListAdapter.notifyDataSetChanged();
                   }
 
@@ -326,6 +326,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                         }
                      }
 
+                     Log.d("---", "showPlaylistSongs_Adapter.notifyDataSetChanged");
                      songListAdapter.notifyDataSetChanged();
                   }
 
@@ -452,6 +453,8 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
                         allSongs.add(recyclerViewModelObject);
 
+                        Log.d("---", "getAllSongs");
+
                      }
                   }
                }
@@ -527,7 +530,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                      }
                   }
                }
-
+               Log.d("---", "showSongBasedOnCategory_Adapter.notifyDataSetChanged");
                songListAdapter.notifyDataSetChanged();
             } else {
                Log.e("---", task.getException().toString());
@@ -607,6 +610,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                   allSongListItems.sort(new SortSongByPlayCount());
                }
 
+               Log.d("---", "showSongBasedOnMainCards_Adapter.notifyDataSetChanged");
                songListAdapter.notifyDataSetChanged();
             } else {
                Log.e("---", task.getException().toString());
@@ -719,6 +723,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                            }
                         }
 
+                        Log.d("---", "showFavoriteList_Adapter.notifyDataSetChanged");
                         songListAdapter.notifyDataSetChanged();
                      } else {
                         Log.e("---", task.getException().toString());
@@ -771,6 +776,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
             //DEFAULT_MEDIA_URI = uri.toString();
             Log.d("---", "URI : " + uri.toString());
             startPlayer(uri.toString());
+
          }
       }).addOnFailureListener(new OnFailureListener() {
          @Override
@@ -786,6 +792,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
          player.stop();
       }
    }
+
 
    private void initializePlayer() {
       if (player == null) {

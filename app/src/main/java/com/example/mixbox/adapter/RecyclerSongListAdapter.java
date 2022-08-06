@@ -30,8 +30,11 @@ import com.example.mixbox.fragments.SearchSongFragment;
 import com.example.mixbox.fragments.SongListFragment;
 import com.example.mixbox.fragments.SongPlayFragment;
 import com.example.mixbox.model.FragmentInfo;
+import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
 import com.example.mixbox.utilities.PlaylistDialog;
+import com.example.mixbox.utilities.SortSongByLatest;
+import com.example.mixbox.utilities.SortSongByPlayCount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -42,6 +45,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -127,6 +135,13 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
          public void onClick(View v) {
             if(listener != null){
                listener.onSongClick(songItem);
+               //update playedCount
+               int playedCount = songItem.getSong().getTimesPlayed();
+               playedCount++;
+               songItem.getSong().setTimesPlayed(playedCount);
+               holder.playCount.setText(Integer.toString(playedCount));
+
+               updatePlayCountToDB(songItem, playedCount);
              }
          }
       });
@@ -151,6 +166,12 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                      case R.id.play:
                         //handle menu1 click
                         listener.onPlayerStop();
+
+                        //update playedCount
+                        int playedCount = songItem.getSong().getTimesPlayed();
+                        playedCount++;
+                        updatePlayCountToDB(songItem, playedCount);
+
                         Bundle bundle = new Bundle();
                         if(fInfo.getType() != ""){
                            bundle.putString("type", fInfo.getType());
@@ -191,6 +212,54 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
             });
             popup.show();
 
+         }
+      });
+   }
+
+
+   private void updatePlayCountToDB(SongListModel songItem, int playedCount) {
+      db.getReference().get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+         @Override
+         public void onComplete(@NonNull Task<DataSnapshot> task) {
+            if (task.isSuccessful()) {
+               DataSnapshot snapshot = task.getResult();
+               HashMap<String, Object> outerMap = (HashMap<String, Object>) snapshot.getValue();
+               HashMap<String, Object> allUsers = (HashMap<String, Object>) outerMap.get("allUsers");
+
+               for (Object value : allUsers.values()) {
+                  HashMap<String, Object> eachUser = (HashMap<String, Object>) value;
+
+
+                  HashMap<String, Object> eachUserSongs = (HashMap<String, Object>) eachUser.get("songs");
+
+                  if (eachUserSongs != null) {
+                     for (Object song : eachUserSongs.values()) {
+                        HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
+
+                        if (eachSong.get("songName").toString().equals(songItem.getSong().getSongName())) {
+                           //Integer.parseInt(eachSong.get("timesPlayed").toString())
+                           eachSong.put("timesPlayed", playedCount);
+                        }
+
+                        db.getReference().child("allUsers").updateChildren(allUsers).addOnCompleteListener(new OnCompleteListener<Void>() {
+                           @Override
+                           public void onComplete(@NonNull Task<Void> task) {
+                              if (task.isSuccessful()) {
+                                 //Toast.makeText(context, "Successfully update the playedCount for " + songItem.getSong().getSongName() + "!", Toast.LENGTH_SHORT).show();
+                                 Log.d("---","Successfully update the playedCount for " + songItem.getSong().getSongName() + "!");
+                              } else {
+                                 Toast.makeText(context, "Failed to update the playedCount! Try again later!", Toast.LENGTH_SHORT).show();
+                                 Log.e("--", task.getException().getMessage());
+                              }
+                           }
+                        });
+                     }
+                  }
+               }
+
+            } else {
+               Log.e("---", task.getException().toString());
+            }
          }
       });
    }
