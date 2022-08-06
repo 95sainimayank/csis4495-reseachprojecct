@@ -1,8 +1,13 @@
 package com.example.mixbox.fragments;
 
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,6 +60,7 @@ import com.google.firebase.storage.StorageReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -712,6 +718,22 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
             Glide.with(getActivity()) //context
               .load(uri)
               .into(binding.albumImageScroll);
+
+            //-------------------------------------------------------------------------
+            Bitmap bitmap = null;
+            ContentResolver contentResolver = getContext().getContentResolver();
+            try {
+               if(Build.VERSION.SDK_INT < 28) {
+                  bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri);
+               } else {
+                  ImageDecoder.Source source = ImageDecoder.createSource(contentResolver, uri);
+                  bitmap = ImageDecoder.decodeBitmap(source);
+               }
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+            //--------------------------------------------------------------------------------
+
          }
       }).addOnFailureListener(new OnFailureListener() {
          @Override
