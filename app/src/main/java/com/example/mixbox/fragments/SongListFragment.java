@@ -1,9 +1,15 @@
 package com.example.mixbox.fragments;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +33,7 @@ import com.example.mixbox.databinding.FragmentSongListBinding;
 import com.example.mixbox.model.FragmentInfo;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
+import com.example.mixbox.service.CreateNotification;
 import com.example.mixbox.utilities.SortSongByLatest;
 import com.example.mixbox.utilities.SortSongByPlayCount;
 import com.google.android.exoplayer2.C;
@@ -87,10 +94,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    //For Player -------------------------------------------------start
    FirebaseStorage storage;
    StorageReference storageRef;
-   private boolean isOwner;
+   private boolean isPlayerStart = false;
    @Nullable
    private PlayerControlView playerControlView;
    //For Player -------------------------------------------------end
+   NotificationManager notificationManager;
 
    public SongListFragment() {
    }
@@ -119,7 +127,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
       storage = FirebaseStorage.getInstance();
       storageRef = storage.getReference();
-      isOwner = true;
+
       playerControlView = binding.playerControlViewScroll;
 
       String type = "";
@@ -140,6 +148,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       }
 
       binding.songlistRecyclerView.setAdapter(songListAdapter);
+
+      if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+         createChannel();
+         getActivity().registerReceiver(broadcastReceiver, new IntentFilter("TRACKS_TRACKS"));
+      }
 
       binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
          @Override
@@ -340,6 +353,17 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    @Override
    public void onStop() {
       super.onStop();
+
+      if(player != null && isPlayerStart){
+         if(player.isPlaying()){
+            Log.d("---", "play.setOnClickListener_call onTrackPause");
+            onTrackPlay();
+         }else{
+            Log.d("---", "play.setOnClickListener_call onTrackPlay");
+            onTrackPause();
+         }
+      }
+
       Log.d("---","[SongListFragment#onStop]");
       ((AppCompatActivity) getActivity()).getSupportActionBar().show();
    }
@@ -348,6 +372,12 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    public void onStart() {
       super.onStart();
       Log.d("---","[SongListFragment#onStart]");
+      if(player != null && isPlayerStart){
+         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            notificationManager.cancelAll();
+         }
+      }
+
    }
 
    @Override
@@ -360,6 +390,10 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
          player.release();
          player = null;
       }
+      if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+         notificationManager.cancelAll();
+      }
+      getActivity().unregisterReceiver(broadcastReceiver);
    }
 
    public void getAllSongs(String val) {
@@ -718,22 +752,6 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
             Glide.with(getActivity()) //context
               .load(uri)
               .into(binding.albumImageScroll);
-
-            //-------------------------------------------------------------------------
-            Bitmap bitmap = null;
-            ContentResolver contentResolver = getContext().getContentResolver();
-            try {
-               if(Build.VERSION.SDK_INT < 28) {
-                  bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri);
-               } else {
-                  ImageDecoder.Source source = ImageDecoder.createSource(contentResolver, uri);
-                  bitmap = ImageDecoder.decodeBitmap(source);
-               }
-            } catch (Exception e) {
-               e.printStackTrace();
-            }
-            //--------------------------------------------------------------------------------
-
          }
       }).addOnFailureListener(new OnFailureListener() {
          @Override
@@ -752,8 +770,6 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
             //DEFAULT_MEDIA_URI = uri.toString();
             Log.d("---", "URI : " + uri.toString());
             startPlayer(uri.toString());
-
-
          }
       }).addOnFailureListener(new OnFailureListener() {
          @Override
@@ -839,6 +855,63 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       player.prepare();
       player.play();
       player.setRepeatMode(Player.REPEAT_MODE_ALL);
+      isPlayerStart = true;
+   }
+
+   private void createChannel() {
+      if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+         NotificationChannel channel = new NotificationChannel(CreateNotification.CHANNEL_ID,
+                 "MIXBOX", NotificationManager.IMPORTANCE_LOW);
+
+         notificationManager = requireContext().getSystemService(NotificationManager.class);
+         if(notificationManager != null){
+            notificationManager.createNotificationChannel(channel);
+         }
+      }
+   }
+
+   BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+         String action = intent.getExtras().getString("actionname");
+         switch(action){
+            case CreateNotification.ACTION_PREVIOUS:
+               //
+               break;
+            case CreateNotification.ACTION_PLAY:
+               if(player != null && player.isPlaying()){
+                  Log.d("---", "Broadcastreceiver_call onTrackPause");
+                  onTrackPause();
+               }else{
+                  Log.d("---", "Broadcastreceiver_call onTrackPlay");
+                  onTrackPlay();
+               }
+               break;
+            case CreateNotification.ACTION_NEXT:
+               //
+               break;
+         }
+      }
+   };
+
+   private void onTrackPlay() {
+
+      Bitmap icon  =((BitmapDrawable)binding.albumImageScroll.getDrawable()).getBitmap();
+      CreateNotification.createNotification(getActivity(), binding.sTitleScroll.getText().toString(),
+              binding.sArtistScroll.getText().toString(), icon, R.drawable.ic_pause_24);
+      if(player != null & !player.isPlaying()){
+         player.play();
+      }
+   }
+
+   private void onTrackPause() {
+      Bitmap icon =((BitmapDrawable)binding.albumImageScroll.getDrawable()).getBitmap();
+      CreateNotification.createNotification(getActivity(), binding.sTitleScroll.getText().toString(),
+              binding.sArtistScroll.getText().toString(), icon, R.drawable.ic_play_arrow_24);
+
+      if(player != null && player.isPlaying()){
+         player.pause();
+      }
    }
 }
 
