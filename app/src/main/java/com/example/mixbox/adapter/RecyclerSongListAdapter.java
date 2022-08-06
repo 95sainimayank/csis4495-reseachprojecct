@@ -171,7 +171,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         if(fInfo.getType() != ""){
                            bundle.putString("type", fInfo.getType());
                            if(fInfo.getType() == "search") {
-                              //bundle.putString("searchKeyword", fInfo.getSearchKeyword());
+                              bundle.putString("searchKeyword", fInfo.getSearchKeyword());
                            }
                            Log.d("---", " [RecyclerSongListAdapter] Song List Type = " + fInfo.getType());
                         }

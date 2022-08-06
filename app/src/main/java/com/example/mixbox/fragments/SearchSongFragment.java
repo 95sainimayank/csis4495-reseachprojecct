@@ -97,6 +97,7 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
    FirebaseDatabase db;
    ArrayList<SongListModel> allSongListItems;
    RecyclerSongListAdapter songListAdapter;
+   FragmentInfo info;
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
@@ -107,6 +108,7 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       binding = FragmentSearchSongBinding.inflate(inflater, container, false);
 
+      Log.d("---", "[SearchSongFragment] onCreateView");
       binding.searchSongToolbar.setNavigationOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
@@ -120,7 +122,7 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
 
       binding.searchedSongRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
       allSongListItems = new ArrayList<>();
-      FragmentInfo info = new FragmentInfo("search","");
+      info = new FragmentInfo("search","");
       songListAdapter = new RecyclerSongListAdapter(getActivity(), allSongListItems, info,this, false);
       binding.searchedSongRecyclerView.setAdapter(songListAdapter);
 
@@ -152,6 +154,12 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
 
       Log.d("---", "Initialize ExoPlayer.");
       initializePlayer();
+
+      if (getArguments()!= null && getArguments().get("searchKeyword") != null) {
+         String songName = getArguments().get("searchKeyword").toString();
+         binding.songText.setText(songName);
+         getSelectedSongs(songName);
+      }
 
       return binding.getRoot();
    }
@@ -227,6 +235,7 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
                   Toast.makeText(getActivity(), "No Song with that name exists !", Toast.LENGTH_SHORT).show();
                }
 
+               info.setSearchKeyword(songName);
                songListAdapter.notifyDataSetChanged();
             } else {
                Log.e("---", task.getException().toString());
