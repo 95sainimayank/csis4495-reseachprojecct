@@ -6,4 +6,5 @@ public interface OnSongClickListener {
     void onSongClick(SongListModel songListModel);
 
     void onPlayerStop();
+
 }
