@@ -74,13 +74,10 @@ public class MapsFragment extends Fragment {
                   Retrofit retrofit = connection.retrofit;
                   AppService appService = retrofit.create(AppService.class);
 
-                  Toast.makeText(getActivity(), city, Toast.LENGTH_SHORT).show();
-
                   appService.getByCity(API_KEY, "*", city).enqueue(new Callback<OuterClass>() {
                      @Override
                      public void onResponse(Call<OuterClass> call, Response<OuterClass> response) {
                         if (response.isSuccessful()) {
-                           Toast.makeText(getActivity(), "Success", Toast.LENGTH_SHORT).show();
                            if (response.body() != null) {
                               _MainEmbedded embedded = response.body().get_embedded();
 
