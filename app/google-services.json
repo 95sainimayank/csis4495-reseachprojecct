@@ -73,6 +73,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "702535879435-pn5aqoqlec48ftct3p902pvalbh4650m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mixbox",
+            "certificate_hash": "75037be84a993b035ce92f1d0fef88f40b51444c"
+          }
+        },
+        {
           "client_id": "702535879435-tps0nfiatk7bsa5prc88im0b4jds69mk.apps.googleusercontent.com",
           "client_type": 3
         }

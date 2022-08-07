@@ -69,6 +69,9 @@ public class SongPlayFragment extends Fragment {
     FirebaseStorage storage;
     String type;
     String playlistName;
+    String searchKeyword;
+    String playedCount;
+    String genres;
     private static final String ACTION_VIEW = "com.example.mixbox.fragments.action.VIEW";
     private static final String EXTENSION_EXTRA = "extension";
     private static final String DRM_SCHEME_EXTRA = "drm_scheme";
@@ -104,6 +107,7 @@ public class SongPlayFragment extends Fragment {
 
     TextView songTitle;
     TextView artistName;
+    TextView songDetailInfo;
     ImageView albumCover;
 
     public SongPlayFragment() {
@@ -124,6 +128,7 @@ public class SongPlayFragment extends Fragment {
         songTitle = binding.sTitle;
         artistName = binding.sArtist;
         albumCover = binding.albumImage;
+        songDetailInfo = binding.sSongInfo;
 
         Log.d("---","[SongPlayFragment#onCreateView]");
 
@@ -138,6 +143,18 @@ public class SongPlayFragment extends Fragment {
 
         if(getArguments().get("playlistName") != null){ // playlistName is not null
             playlistName = getArguments().get("playlistName").toString();
+        }
+
+        if(getArguments().get("searchKeyword") != null){ // searchKeyword is not null
+            searchKeyword = getArguments().get("searchKeyword").toString();
+        }
+
+        if(getArguments().get("playedCount") != null){ // playedCount is not null
+            playedCount = getArguments().get("playedCount").toString();
+        }
+
+        if(getArguments().get("genres") != null){ // genres is not null
+            genres = getArguments().get("genres").toString();
         }
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -155,9 +172,10 @@ public class SongPlayFragment extends Fragment {
                 //getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new SongListFragment()).commit();
 
                 if(type == "search"){
-                    //Bundle bundle = new Bundle();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("searchKeyword", searchKeyword);
                     SearchSongFragment fragment = new SearchSongFragment();
-                    //fragment.setArguments(bundle);
+                    fragment.setArguments(bundle);
                     getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
                 }else{
                     Bundle bundle = new Bundle();
@@ -182,7 +200,7 @@ public class SongPlayFragment extends Fragment {
         isOwner = true;
 
         sTitle = getArguments().get("title").toString();
-        artist = getArguments().get("artist").toString();
+        artist = "Artist: " + getArguments().get("artist").toString();
         songTitle.setText(sTitle);
         songTitle.setSelected(true);
         artistName.setText(artist);
@@ -196,24 +214,6 @@ public class SongPlayFragment extends Fragment {
                 Glide.with(getActivity() ) //context
                         .load(uri)
                         .into(binding.albumImage);
-
-
-                //-------------------------------------------------------------------------
-                /*
-                //Bitmap bitmap = null;
-                ContentResolver contentResolver = getActivity().getContentResolver();
-                try {
-                    if(Build.VERSION.SDK_INT < 28) {
-                        currentAlbumBitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri);
-                    } else {
-                        ImageDecoder.Source source = ImageDecoder.createSource(contentResolver, uri);
-                        currentAlbumBitmap = ImageDecoder.decodeBitmap(source);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                */
-                //--------------------------------------------------------------------------------
             }
 
         }).addOnFailureListener(new OnFailureListener() {
@@ -223,6 +223,28 @@ public class SongPlayFragment extends Fragment {
             }
         });
 
+        String detailInfo = "";
+
+        if(genres != null){
+            detailInfo += "Genre: " + genres + "\n";
+        }
+
+        detailInfo += "It is played " + playedCount+ " times by users. \n";
+
+        switch (type) {
+            case "latest":
+                detailInfo += "This song is one of the latest song.";
+                break;
+            case "mostPlayed":
+                detailInfo += "This song is one of the most played song.";
+                break;
+            case "favorite":
+                detailInfo += "This song is one of your favourite song.";
+            default:
+                break;
+        }
+
+        songDetailInfo.setText(detailInfo);
 
         Log.d("---", "Initialize ExoPlayer.");
         initializePlayer();

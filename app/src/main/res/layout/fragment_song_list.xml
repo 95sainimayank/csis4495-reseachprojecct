@@ -124,6 +124,28 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/album"
                 tools:srcCompat="@drawable/album" />
+
+            <TextView
+                android:id="@+id/sSongInfoScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="12dp"
+                android:text="Song detail information"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/sMoreInfoScroll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:gravity="bottom|left"
+                android:text="@string/moreInfoTxt"
+                android:textColor="@color/agreeable_gray"
+                android:textSize="12sp"/>
         </LinearLayout>
 
     </FrameLayout>

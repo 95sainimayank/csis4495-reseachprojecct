@@ -6,4 +6,5 @@
     <string name="playSongArtist">song artist</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="moreInfoTxt">"MUSIX supports the remix artists and DJs where there is a better chance to get noticed and praised by the app's users. "</string>
 </resources>
