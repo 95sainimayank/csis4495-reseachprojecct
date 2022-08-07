@@ -68,6 +68,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class SearchSongFragment extends Fragment implements OnSongClickListener{
@@ -131,6 +132,7 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
       binding.searchSTitleScroll.setSelected(true);
       binding.searchSArtistScroll.setText("Artist");
       binding.searchSArtistScroll.setSelected(true);
+      binding.searchSongInfoScroll.setText("Song detail info");
 
       storage = FirebaseStorage.getInstance();
       storageRef = storage.getReference();
@@ -215,12 +217,17 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
 
                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
+                           List<String> genres = new ArrayList<>();
+                           HashMap<String, Object> genreMap = (HashMap<String, Object>) eachSong.get("genre");
+                           for (Object genre : genreMap.values()) {
+                              genres.add(genre.toString());
+                           }
 
                            recyclerViewModelObject.
                              setSong(new Song(eachSong.get("songName").toString(),
                                Integer.parseInt(eachSong.get("timesPlayed").toString()),
                                LocalDateTime.parse(d, formatter),
-                               null));
+                               genres));
 
                            Log.e("---", recyclerViewModelObject.getSong().getSongName());
 
@@ -301,7 +308,24 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
    @Override
    public void onSongClick(SongListModel songListModel) {
       binding.searchSTitleScroll.setText(songListModel.getSong().getSongName());
-      binding.searchSArtistScroll.setText(songListModel.getArtistName());
+      binding.searchSArtistScroll.setText("Artist : " + songListModel.getArtistName());
+
+      String detailInfo = "";
+      //"Song Title : " + songListModel.getSong().getSongName().split("\\.")[0] + "\n";
+      //detailInfo += "Artist : " + songListModel.getArtistName() + "\n";
+
+      if(songListModel.getSong().getGenres() != null){
+         String genres = "";
+         for(String genre: songListModel.getSong().getGenres()){
+            genres += genre + "  ";
+         }
+         detailInfo += "Genre: " + genres  + "\n";
+      }
+
+      detailInfo += "This song is one of the your search result." + "\n";
+      detailInfo += "This song  is played " +songListModel.getSong().getTimesPlayed()+ " times by users.";
+
+      binding.searchSongInfoScroll.setText(detailInfo);
 
       if (player != null) {
          player.stop();

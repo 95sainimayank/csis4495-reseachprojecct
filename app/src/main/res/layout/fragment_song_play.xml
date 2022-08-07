@@ -70,8 +70,8 @@
             android:id="@+id/sTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
             android:layout_marginStart="24dp"
+            android:layout_marginTop="12dp"
             android:layout_marginEnd="24dp"
             android:ellipsize="marquee"
             android:focusable="true"
@@ -90,22 +90,41 @@
             android:id="@+id/sArtist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
             android:layout_marginStart="24dp"
+            android:layout_marginTop="6dp"
             android:layout_marginEnd="24dp"
+            android:layout_marginBottom="12dp"
             android:ellipsize="marquee"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
-            android:singleLine="true"
 
-            android:layout_marginBottom="20dp"
+            android:singleLine="true"
             android:text="@string/playSongArtist"
             android:textColor="@color/teal_200"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="@+id/sTitle"
             app:layout_constraintTop_toBottomOf="@+id/sTitle" />
+        <TextView
+            android:id="@+id/sSongInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:text="Song detail information"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+        <TextView
+            android:id="@+id/sMoreInfo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:gravity="bottom|left"
+            android:text="@string/moreInfoTxt"
+            android:textColor="@color/agreeable_gray"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
