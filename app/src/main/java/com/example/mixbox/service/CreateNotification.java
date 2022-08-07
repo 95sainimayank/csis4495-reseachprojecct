@@ -37,8 +37,20 @@ public class CreateNotification {
 
             Intent intentPlay = new Intent(context, NotificationActionService.class)
                     .setAction(ACTION_PLAY);
-            PendingIntent pendingIntentPlay = PendingIntent.getBroadcast(context, 0,
-                    intentPlay, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            PendingIntent pendingIntentPlay;
+                    //PendingIntent.getBroadcast(context, 0,
+            //        intentPlay, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                pendingIntentPlay = PendingIntent.getBroadcast(context,
+                        0, intentPlay, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            }else {
+                pendingIntentPlay = PendingIntent.getBroadcast(context,
+                        0, intentPlay, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            }
 
             notification = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_music_note_24)
