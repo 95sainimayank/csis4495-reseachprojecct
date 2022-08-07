@@ -134,11 +134,13 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
          @Override
          public void onClick(View v) {
             if(listener != null){
-               listener.onSongClick(songItem);
                //update playedCount
                int playedCount = songItem.getSong().getTimesPlayed();
                playedCount++;
                songItem.getSong().setTimesPlayed(playedCount);
+
+               listener.onSongClick(songItem);
+
                holder.playCount.setText(Integer.toString(playedCount));
 
                updatePlayCountToDB(songItem, playedCount);
@@ -168,6 +170,7 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         updatePlayCountToDB(songItem, playedCount);
 
                         Bundle bundle = new Bundle();
+
                         if(fInfo.getType() != ""){
                            bundle.putString("type", fInfo.getType());
                            if(fInfo.getType() == "search") {
@@ -183,6 +186,18 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         bundle.putString("title", songItem.getSong().getSongName());
                         bundle.putString("artist", songItem.getArtistName());
                         String albumCoverName = songItem.getSong().getSongName().split("\\.")[0] + ".png";
+                        if(songItem.getSong().getGenres() != null){
+                           String genres = "";
+                           for(String genre: songItem.getSong().getGenres()){
+                              genres += genre + " ";
+                           }
+                           bundle.putString("genres",genres );
+                           Log.d("---", "[recyclerView] genre is " + genres);
+                        }else{
+                           Log.d("---", "[recyclerView] genre is null");
+                        }
+
+                        bundle.putString("playedCount",Integer.toString(playedCount));
                         bundle.putString("albumCover",albumCoverName);
                         SongPlayFragment fragment = new SongPlayFragment();
                         fragment.setArguments(bundle);

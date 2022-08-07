@@ -99,6 +99,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    private PlayerControlView playerControlView;
    //For Player -------------------------------------------------end
    NotificationManager notificationManager;
+   String type;
 
    public SongListFragment() {
    }
@@ -123,13 +124,14 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       binding.sTitleScroll.setSelected(true);
       binding.sArtistScroll.setText("Artist");
       binding.sTitleScroll.setSelected(true);
+      binding.sSongInfoScroll.setText("Detail Song Information");
 
       storage = FirebaseStorage.getInstance();
       storageRef = storage.getReference();
 
       playerControlView = binding.playerControlViewScroll;
 
-      String type = "";
+      type = "";
 
       if (getArguments().get("type") != null)
          type = getArguments().get("type").toString();
@@ -259,11 +261,17 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
+                           List<String> genres = new ArrayList<>();
+                           HashMap<String, Object> genreMap = (HashMap<String, Object>) eachSong.get("genre");
+                           for (Object genre : genreMap.values()) {
+                              genres.add(genre.toString());
+                           }
+
                            Song s = new Song(
                                             eachSong.get("songName").toString(),
                                             Integer.parseInt(eachSong.get("timesPlayed").toString()),
                                             LocalDateTime.parse(d, formatter),
-                                            null);
+                                            genres);
 
                            songListModel.setSong(s);
 
@@ -486,6 +494,11 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
 
                         HashMap<String, Object> genreMap = (HashMap<String, Object>) eachSong.get("genre");
+                        List<String> genres = new ArrayList<>();
+                          for (Object genre : genreMap.values()) {
+                           genres.add(genre.toString());
+                        }
+
 
                         for (Object genre : genreMap.values()) {
                            if (genre.toString().equals(category)) {
@@ -522,7 +535,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                                   Integer.parseInt(eachSong.get("timesPlayed").toString()),
 
                                   LocalDateTime.parse(d, formatter),
-                                  null));
+                                  genres));
 
                               allSongListItems.add(recyclerViewModelObject);
                            }
@@ -562,7 +575,10 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
 
                         HashMap<String, Object> genreMap = (HashMap<String, Object>) eachSong.get("genre");
-
+                        List<String> genres = new ArrayList<>();
+                        for (Object genre : genreMap.values()) {
+                           genres.add(genre.toString());
+                        }
 
                         SongListModel recyclerViewModelObject = new SongListModel();
 
@@ -592,11 +608,12 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
 
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
 
+
                         recyclerViewModelObject.
                           setSong(new Song(eachSong.get("songName").toString(),
                             Integer.parseInt(eachSong.get("timesPlayed").toString()),
                             LocalDateTime.parse(d, formatter),
-                            null));
+                            genres));
 
                         allSongListItems.add(recyclerViewModelObject);
 
@@ -711,7 +728,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                                             setSong(new Song(s.getSong().getSongName().toString(),
                                               s.getSong().getTimesPlayed(),
                                               LocalDateTime.parse(s.getSong().getDateTime().toString()),
-                                              null));
+                                              s.getSong().getGenres()));
 
                                           allSongListItems.add(recyclerViewModelObject);
                                        }
@@ -743,7 +760,36 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    @Override
    public void onSongClick(SongListModel songListModel) {
       binding.sTitleScroll.setText(songListModel.getSong().getSongName());
-      binding.sArtistScroll.setText(songListModel.getArtistName());
+      binding.sArtistScroll.setText("Artist: " + songListModel.getArtistName());
+
+      String detailInfo = "";
+      //"Song Title : " + songListModel.getSong().getSongName().split("\\.")[0] + "\n";
+      //detailInfo += "Artist : " + songListModel.getArtistName() + "\n";
+
+      if(songListModel.getSong().getGenres() != null){
+         String genres = "";
+         for(String genre: songListModel.getSong().getGenres()){
+            genres += genre + "  ";
+         }
+         detailInfo += "Genre: " + genres + "\n";
+      }
+
+      detailInfo += "It is played " +songListModel.getSong().getTimesPlayed()+ " times by users.\n";
+
+      switch (type) {
+         case "latest":
+            detailInfo += "This song is one of the latest song.";
+            break;
+         case "mostPlayed":
+            detailInfo += "This song is one of the most played song. ";
+            break;
+         case "favorite":
+            detailInfo += "This song is one of your favourite song.";
+         default:
+            break;
+      }
+
+      binding.sSongInfoScroll.setText(detailInfo);
 
       if (player != null) {
          player.stop();
