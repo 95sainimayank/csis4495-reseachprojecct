@@ -97,30 +97,22 @@ public class UploadFragment extends Fragment {
             if(binding.edmCheck.isChecked()) songCategories.add("edm");
 
 
-           // String[] audioNameSplit = songNameSplit[songNameSplit.length - 1].split("\\.");
-
-
             if(songAudioUri == null)
                Toast.makeText(getActivity(), "Please choose a audio file!", Toast.LENGTH_SHORT).show();
             else if (songImageUri == null)
                Toast.makeText(getActivity(), "Please choose a image file!", Toast.LENGTH_SHORT).show();
             else if (!binding.edmCheck.isChecked() && !binding.rnbCheck.isChecked()  && !binding.rockCheck.isChecked())
                Toast.makeText(getActivity(), "Please select at least one category!", Toast.LENGTH_SHORT).show();
-            else{
-
+            else{// If all the required data is selected
                Log.e("debug", (songAudioUri == null)+ "\t" + (songImageUri == null) );
                disableViews();
                String[] songNameSplit = songAudioUri.getLastPathSegment().split("/");
                updateInDb(songNameSplit[songNameSplit.length - 1], songCategories);
 
                storage = FirebaseStorage.getInstance().getReference();
-//               String[] songNameSplit = songAudioUri.getLastPathSegment().split("/");
                if(!boo)
                   Toast.makeText(getActivity(), "Audio file upload started.", Toast.LENGTH_SHORT).show();
-
-              uploadAudio(songNameSplit[songNameSplit.length - 1]);
-
-
+                  uploadAudio(songNameSplit[songNameSplit.length - 1]);
             }
          }
       });
@@ -167,6 +159,7 @@ public class UploadFragment extends Fragment {
 
    }
 
+   //Uploads image to the storage
    private void uploadImage(String imageName) {
       if(!boo)
          Toast.makeText(getActivity(), "Image upload started", Toast.LENGTH_SHORT).show();

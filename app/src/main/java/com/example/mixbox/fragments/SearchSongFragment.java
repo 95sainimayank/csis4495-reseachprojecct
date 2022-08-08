@@ -11,7 +11,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +27,6 @@ import com.bumptech.glide.Glide;
 import com.example.mixbox.R;
 import com.example.mixbox.adapter.RecyclerSongListAdapter;
 import com.example.mixbox.databinding.FragmentSearchSongBinding;
-import com.example.mixbox.databinding.FragmentSongListBinding;
 import com.example.mixbox.model.FragmentInfo;
 import com.example.mixbox.model.Song;
 import com.example.mixbox.model.SongListModel;
@@ -84,7 +82,6 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
    private static String DEFAULT_MEDIA_URI = "";
 
    FirebaseAuth auth;
-   //ArrayList<SongListModel> allSongs;
    FirebaseStorage storage;
    StorageReference storageRef;
    private boolean isPlayerStart = false;
@@ -311,8 +308,6 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
       binding.searchSArtistScroll.setText("Artist : " + songListModel.getArtistName());
 
       String detailInfo = "";
-      //"Song Title : " + songListModel.getSong().getSongName().split("\\.")[0] + "\n";
-      //detailInfo += "Artist : " + songListModel.getArtistName() + "\n";
 
       if(songListModel.getSong().getGenres() != null){
          String genres = "";
@@ -355,7 +350,6 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
 
          @Override
          public void onSuccess(Uri uri) {
-            //DEFAULT_MEDIA_URI = uri.toString();
             Log.d("---", "URI : " + uri.toString());
             startPlayer(uri.toString());
 
@@ -388,18 +382,14 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
    }
 
    private void startPlayer(String mediaUri) {
-      //Bundle bundle = getArguments();
       Intent intent = null;
       Uri data = null;
-      //String action = intent.getAction();
 
       Log.d("---", "startPlayer play: uri - " + mediaUri);
-      //DEFAULT_MEDIA_URI = "https://firebasestorage.googleapis.com/v0/b/hkkofirstproject.appspot.com/o/hopeful-piano-112621.mp3?alt=media&token=00a85881-aaf7-4063-be78-db9b16dfc8e7";
 
       String action = "";
       Uri uri =
               ACTION_VIEW.equals(action)
-                      //? Assertions.checkNotNull(intent.getData())
                       ? Assertions.checkNotNull(data)
                       : Uri.parse(mediaUri);
 
@@ -439,8 +429,6 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
          throw new IllegalStateException();
       }
 
-      //ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
-
       player.setMediaSource(mediaSource);
       player.prepare();
       player.play();
@@ -479,7 +467,6 @@ public class SearchSongFragment extends Fragment implements OnSongClickListener{
                }
                break;
             case CreateNotification.ACTION_NEXT:
-               //
                break;
          }
       }

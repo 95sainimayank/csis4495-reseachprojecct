@@ -58,8 +58,6 @@ import java.util.UUID;
 
 public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongListAdapter.ViewHolder> {
    private Context context;
-   //String type;
-   //String playlistName;
    FragmentInfo fInfo;
    ArrayList<SongListModel> songList;
    FirebaseDatabase db;
@@ -68,8 +66,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
    FirebaseStorage storage;
    StorageReference storageRef;
    boolean isProfile;
-
-   //HashSet<String> typeSet = new HashSet<>(Arrays.asList("rock", "edm", "rnb", "latest", "mostPlayed", "favorite"));
 
    public RecyclerSongListAdapter(Context context, ArrayList<SongListModel> songList, FragmentInfo info, OnSongClickListener listener, boolean pro){
         this.context = context;
@@ -90,14 +86,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
       storageRef = storage.getReference();
       FirebaseAuth auth = FirebaseAuth.getInstance();
       currentUserEmail = auth.getCurrentUser().getEmail().toString();
-
-      /*
-      storage = FirebaseStorage.getInstance();
-      storageRef = storage.getReference();-0
-      isOwner = true;
-      //playerControlView = binding.playerControlViewScroll;
-
-       */
 
       return viewHolder;
    }
@@ -247,7 +235,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                         HashMap<String, Object> eachSong = (HashMap<String, Object>) song;
 
                         if (eachSong.get("songName").toString().equals(songItem.getSong().getSongName())) {
-                           //Integer.parseInt(eachSong.get("timesPlayed").toString())
                            eachSong.put("timesPlayed", playedCount);
                         }
 
@@ -255,7 +242,6 @@ public class RecyclerSongListAdapter extends RecyclerView.Adapter<RecyclerSongLi
                            @Override
                            public void onComplete(@NonNull Task<Void> task) {
                               if (task.isSuccessful()) {
-                                 //Toast.makeText(context, "Successfully update the playedCount for " + songItem.getSong().getSongName() + "!", Toast.LENGTH_SHORT).show();
                                  Log.d("---","Successfully update the playedCount for " + songItem.getSong().getSongName() + "!");
                               } else {
                                  Toast.makeText(context, "Failed to update the playedCount! Try again later!", Toast.LENGTH_SHORT).show();

@@ -30,7 +30,6 @@ public class CreateNotification {
             NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
             MediaSessionCompat mediaSessionCompat = new MediaSessionCompat(context, "tag");
 
-            //Bitmap icon = BitmapFactory.decodeResource(context.getResources(), track.getImage());
             if(icon == null){
                 icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.album);
             }
@@ -39,8 +38,6 @@ public class CreateNotification {
                     .setAction(ACTION_PLAY);
 
             PendingIntent pendingIntentPlay;
-                    //PendingIntent.getBroadcast(context, 0,
-            //        intentPlay, PendingIntent.FLAG_UPDATE_CURRENT);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 pendingIntentPlay = PendingIntent.getBroadcast(context,
@@ -49,7 +46,6 @@ public class CreateNotification {
             }else {
                 pendingIntentPlay = PendingIntent.getBroadcast(context,
                         0, intentPlay, PendingIntent.FLAG_UPDATE_CURRENT);
-
             }
 
             notification = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -62,7 +58,6 @@ public class CreateNotification {
                     .addAction(playbutton, "Play", pendingIntentPlay)
                     .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setShowActionsInCompactView(0))
-//                          .setMediaSession(mediaSessionCompat.getSessionToken()))
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .build();
 
