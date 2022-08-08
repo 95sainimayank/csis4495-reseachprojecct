@@ -679,7 +679,7 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                            d = jobj.getString("year") + "-"+
                              jobj.getString("monthValue") + "-" + jobj.getString("dayOfMonth") + " " + ho + ":" + jobj.getString("minute");
                         } catch (JSONException e) {
-                           Log.e("hahah", e.getMessage().toString());
+                           Log.e("---", e.getMessage().toString());
                         }
 
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m");
@@ -763,8 +763,6 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
       binding.sArtistScroll.setText("Artist: " + songListModel.getArtistName());
 
       String detailInfo = "";
-      //"Song Title : " + songListModel.getSong().getSongName().split("\\.")[0] + "\n";
-      //detailInfo += "Artist : " + songListModel.getArtistName() + "\n";
 
       if(songListModel.getSong().getGenres() != null){
          String genres = "";
@@ -852,13 +850,10 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
    }
 
    private void startPlayer(String mediaUri) {
-      //Bundle bundle = getArguments();
       Intent intent = null;
       Uri data = null;
-      //String action = intent.getAction();
 
       Log.d("---", "startPlayer play: uri - " + mediaUri);
-      //DEFAULT_MEDIA_URI = "https://firebasestorage.googleapis.com/v0/b/hkkofirstproject.appspot.com/o/hopeful-piano-112621.mp3?alt=media&token=00a85881-aaf7-4063-be78-db9b16dfc8e7";
 
       String action = "";
       Uri uri =
@@ -942,7 +937,6 @@ public class SongListFragment extends Fragment implements OnSongClickListener {
                }
                break;
             case CreateNotification.ACTION_NEXT:
-               //
                break;
          }
       }

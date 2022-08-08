@@ -56,8 +56,6 @@ public class PlaylistFragment extends Fragment {
 
       getAllPlaylists();
 
-
-
       binding.btnAddPlaylist.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {

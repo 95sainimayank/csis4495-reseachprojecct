@@ -3,22 +3,14 @@ package com.example.mixbox.fragments;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,12 +18,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.bumptech.glide.Glide;
-import com.example.mixbox.MainActivity;
 import com.example.mixbox.R;
-import com.example.mixbox.databinding.FragmentSongListBinding;
 import com.example.mixbox.databinding.FragmentSongPlayBinding;
-import com.example.mixbox.model.SongListModel;
 import com.example.mixbox.service.CreateNotification;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -51,7 +44,6 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
-import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.FirebaseDatabase;
@@ -79,9 +71,7 @@ public class SongPlayFragment extends Fragment {
     private static final String OWNER_EXTRA = "owner";
 
     private static String DEFAULT_MEDIA_URI =
-            //"https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv";
             "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3";
-    //https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3
 
     private boolean isOwner;
     @Nullable
@@ -89,18 +79,6 @@ public class SongPlayFragment extends Fragment {
 
     @Nullable private static ExoPlayer player;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    //private static final String ARG_PARAM1 = "param1";
-    //private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    //private String mParam1;
-    //private String mParam2;
-
-    //For test
-
-    //int position = 0;
     String sTitle = "song title";
     String artist = "artist name";
     Bitmap currentAlbumBitmap;
@@ -169,7 +147,6 @@ public class SongPlayFragment extends Fragment {
                 if(player != null){
                     player.stop();
                 }
-                //getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new SongListFragment()).commit();
 
                 if(type == "search"){
                     Bundle bundle = new Bundle();
@@ -196,7 +173,6 @@ public class SongPlayFragment extends Fragment {
 
         playerControlView = binding.playerControlView;
 
-        //isOwner = getIntent().getBooleanExtra(OWNER_EXTRA, /* defaultValue= */ true);
         isOwner = true;
 
         sTitle = getArguments().get("title").toString();
@@ -266,8 +242,6 @@ public class SongPlayFragment extends Fragment {
             }
         });
 
-
-
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_song_play, container, false);
         return binding.getRoot();
@@ -290,13 +264,6 @@ public class SongPlayFragment extends Fragment {
         super.onResume();
 
         Log.d("---","[SongPlayFragment#onResume]");
-//        if (isOwner && player == null) {
-//           initializePlayer();
-//        }
-//
-//        PlayerControlView playerControlView = Assertions.checkNotNull(this.playerControlView);
-//        playerControlView.setPlayer(player);
-//        playerControlView.show();
     }
 
     @Override
@@ -304,7 +271,6 @@ public class SongPlayFragment extends Fragment {
         super.onPause();
 
         Log.d("---","[SongPlayFragment#onPause]");
-        //Assertions.checkNotNull(playerControlView).setPlayer(null);
 
     }
 
@@ -343,14 +309,11 @@ public class SongPlayFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d("---","[SongPlayFragment#onDestroy]");
-        //if (isOwner && isFinishing()) {
-
             if (player != null) {
                 player.stop();
                 player.release();
                 player = null;
             }
-       // }
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             notificationManager.cancelAll();
@@ -370,13 +333,10 @@ public class SongPlayFragment extends Fragment {
     }
 
     private void startPlayer(String mediaUri) {
-        //Bundle bundle = getArguments();
         Intent intent = null;
         Uri data = null;
-        //String action = intent.getAction();
 
         Log.d("---", "startPlayer play: uri - " + mediaUri);
-        //DEFAULT_MEDIA_URI = "https://firebasestorage.googleapis.com/v0/b/hkkofirstproject.appspot.com/o/hopeful-piano-112621.mp3?alt=media&token=00a85881-aaf7-4063-be78-db9b16dfc8e7";
 
         String action = "";
         Uri uri =
@@ -421,8 +381,6 @@ public class SongPlayFragment extends Fragment {
             throw new IllegalStateException();
         }
 
-        //ExoPlayer player = new ExoPlayer.Builder(getActivity()).build();
-
         player.setMediaSource(mediaSource);
         player.prepare();
         player.play();
@@ -447,7 +405,6 @@ public class SongPlayFragment extends Fragment {
                     }
                     break;
                 case CreateNotification.ACTION_NEXT:
-                    //
                     break;
             }
         }
