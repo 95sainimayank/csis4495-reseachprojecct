@@ -12,4 +12,3 @@ public interface AppService {
    Call<OuterClass> getByCity(@Query("apikey")String apikey, @Query("locale") String locale, @Query("city") String city);
 
 }
-//@GET("/discovery/v2/events?apikey=WoxMvvr1Q3d6mpyCG3n67BwAD55NNUcZ&locale=*&city={newCity}")
